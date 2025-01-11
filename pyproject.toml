@@ -8,7 +8,6 @@ requires-python = "3.12.8"
 dependencies = [
     "streamlit (==1.41.1)",
     "pandas (==2.2.3)",
-    "pygwalker (==0.4.9.9)",
     "numpy (==1.26.4)",
     "plotly (==5.24.1)",
 ]
@@ -19,5 +18,3 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 
-[tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
