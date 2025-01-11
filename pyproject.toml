@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = [{ name = "edegp", email = "a.yuhi1164@gmail.com" }]
 readme = "README.md"
-requires-python = "3.12.7"
+requires-python = "3.12.8"
 dependencies = [
     "streamlit (==1.41.1)",
     "pandas (==2.2.3)",
@@ -20,4 +20,3 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
-
