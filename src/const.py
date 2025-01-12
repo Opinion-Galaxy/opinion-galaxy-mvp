@@ -1,4 +1,6 @@
+import streamlit as st
 import plotly.express as px
+import pandas as pd
 
 # 論点リスト
 topics = [
@@ -31,3 +33,46 @@ color_map = {
 }
 
 figure_tabs = ["意見の推移", "性別の割合", "性別・年代別の割合", "地域別の賛成割合"]
+
+
+@st.cache_data
+def get_prefecture_city():
+    prefecture_city = pd.read_csv(
+        "data/prefecture_city_lonlat.csv",
+        encoding="utf-8",
+    )
+    return prefecture_city
+
+
+@st.cache_data
+def get_prefecture_and_city_list():
+    prefecture_city = get_prefecture_city()
+    return (
+        prefecture_city["都道府県名"].unique().tolist(),
+        prefecture_city.groupby("都道府県名")["市区町村名"].unique().to_dict(),
+    )
+
+
+prefecture_list, city_dict = get_prefecture_and_city_list()
+
+button_style = """
+    <style>
+    div.st-key-opinion-container div.stColumn:nth-of-type(1) div.stButton > button:first-child {
+        background-color: rgb(67, 147, 195);
+        color: black;
+    }
+    div.st-key-opinion-container div.stColumn:nth-of-type(2) div.stButton > button:first-child {
+        background-color: rgb(209, 229, 240);
+        color: black;
+    }
+    div.st-key-opinion-container div.stColumn:nth-of-type(3) div.stButton > button:first-child {
+        background-color: rgb(214, 96, 77);
+        color: black;
+    }
+    div.st-key-opinion-container div.stColumn {
+        min-width: 60px;
+        justify-content: center;
+        align-content: center;
+    }
+    </style>
+"""

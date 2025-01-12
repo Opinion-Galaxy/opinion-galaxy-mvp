@@ -41,6 +41,7 @@ def visualize_data_by_various_method(
             color="agree",  # , facet
             markers=True,
             color_discrete_map=color_map,
+            labels={"cumsum": "割合", "response_datetime": "日付", "agree": "意見"},
         )
         st.plotly_chart(fig, use_container_width=True)
     with tabs[1]:
