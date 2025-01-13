@@ -1,4 +1,5 @@
 from typing import Tuple
+import numpy as np
 import pandas as pd
 from pandera.typing import DataFrame
 
@@ -11,10 +12,19 @@ def preprocess_basic_pie(data: DataFrame[Data], selected_topic: Topics) -> pd.Da
 
 
 def preprocess_time_series_area(cumsum_radio_data: DataFrame[Dataset]) -> pd.DataFrame:
-    return (
+    time_cumsum = (
         cumsum_radio_data.groupby(["response_datetime", "agree"])["cumsum"]
         .mean()
+        .unstack(level=0, fill_value=0)
+        .cumsum(axis=1)
+    )
+    return (
+        (
+            time_cumsum
+            / np.arange(1, time_cumsum.shape[1] + 1).reshape(1, -1).repeat(3, axis=0)
+        )
         .reset_index()
+        .melt(ignore_index=False, value_name="cumsum", id_vars=["agree"])
     )
 
 
@@ -47,7 +57,10 @@ def preprocess_geo_scatter(
     )
     cumsum_radio_data.loc[cumsum_radio_data["agree"] == "反対", "cumsum"] *= -1
     cumsum_radio_data_by_city = (
-        cumsum_radio_data.groupby("address")["cumsum"].mean().reset_index()
+        cumsum_radio_data.dropna(subset="cumsum")
+        .groupby("address")["cumsum"]
+        .mean()
+        .reset_index()
     )
     cumsum_radio_data = cumsum_radio_data_by_city.merge(count, how="left", on="address")
     return merge_lonlat(cumsum_radio_data).dropna(subset=["count"], how="any")

@@ -57,19 +57,19 @@ prefecture_list, city_dict = get_prefecture_and_city_list()
 
 button_style = """
     <style>
-    div.st-key-opinion-container div.stColumn:nth-of-type(1) div.stButton > button:first-child {
+    div.st-key-select-opinion-container div.stColumn:nth-of-type(1) div.stButton > button:first-child {
         background-color: rgb(67, 147, 195);
         color: black;
     }
-    div.st-key-opinion-container div.stColumn:nth-of-type(2) div.stButton > button:first-child {
+    div.st-key-select-opinion-container div.stColumn:nth-of-type(2) div.stButton > button:first-child {
         background-color: rgb(209, 229, 240);
         color: black;
     }
-    div.st-key-opinion-container div.stColumn:nth-of-type(3) div.stButton > button:first-child {
+    div.st-key-select-opinion-container div.stColumn:nth-of-type(3) div.stButton > button:first-child {
         background-color: rgb(214, 96, 77);
         color: black;
     }
-    div.st-key-opinion-container div.stColumn {
+    div.st-key-select-opinion-container div.stColumn {
         min-width: 60px;
         justify-content: center;
         align-content: center;

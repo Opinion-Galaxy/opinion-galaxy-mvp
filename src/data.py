@@ -4,74 +4,73 @@ import streamlit as st
 from pandera.typing import DataFrame
 
 
-from .type import Data, Dataset, DatasetWithLonLat, Topics, OpinionMap
+from .type import Data, DatasetWithLonLat, Topics
 from .const import get_prefecture_city, topics, opinion_map
 
 
 # サンプルデータの作成
 @st.cache_data
-def load_data() -> DataFrame[Data]:
+def load_data() -> pd.DataFrame:
+    dtype_dict = {topic: "Int64" for topic in topics}
+    parse_dates = ["response_datetime"]
+
+    # `opinion_map` を事前に適用するためにデータを読み込んだ後に変換
     data = pd.read_csv(
         "data/dummy_political_opinions_with_datetime.csv",
-        parse_dates=["response_datetime"],
-        dtype={topic: "Int64" for topic in topics},
-        converters={
-            topic: lambda x: opinion_map[str(int(float(x)))]
-            if not pd.isna(x) and x != ""
-            else x
-            for topic in topics
-        },
+        parse_dates=parse_dates,
+        dtype=dtype_dict,
     ).sort_values("response_datetime")
+
+    # `opinion_map` の適用をベクトル化
+    for topic in topics:
+        data[topic] = (
+            data[topic].astype("Float64").astype("Int64").astype(str).map(opinion_map)
+        )
+
+    # 年齢のカテゴリ分けを一度に行う
     data["age"] = pd.cut(
         data["age"],
-        np.arange(10, 100, 10),
-        labels=np.arange(10, 90, 10).astype(str).astype(object) + "代",
+        bins=np.arange(10, 100, 10),
+        labels=[f"{i}代" for i in range(10, 90, 10)],
+        right=False,
     )
+
+    # 日付フォーマットを一度に適用
     data["response_datetime"] = data["response_datetime"].dt.strftime("%Y-%m-%d")
+
     return data
 
 
-def create_cumsum_radio_data(
-    data: Data, selected_topic: Topics, agree_neutral_disagree="賛成"
-) -> pd.DataFrame:
-    selected_data = data[data[selected_topic] == agree_neutral_disagree].copy()
-    cumsum_data = (
-        selected_data.groupby(["sex", "age", "response_datetime", "address"])[
+# -----------------------------------------------------------
+# もとの create_dataset 相当の機能をまとめて実行する
+# -----------------------------------------------------------
+@st.cache_data
+def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
+    """
+    create_cumsum_radio_data_all で作った結果を melt して
+    ['agree', 'cumsum'] 列を持たせる形にする。
+    """
+    # まとめて累積処理
+    # groupby して各意見の件数を pivot
+    grouped = (
+        data.groupby(["sex", "age", "response_datetime", "address", selected_topic])[
             selected_topic
         ]
         .count()
-        .unstack(fill_value=0)
-        .sort_index()
-        .cumsum(axis=1)
+        .unstack(level=-1, fill_value=0)  # 意見ごとに列を展開
+        .sort_index(axis=1)  # 賛成・中立・反対などの列順を確定
+        .sort_index()  # index 軸([sex, age, response_datetime, address])の順序も確定
     )
-    grouped_count = (
-        data.groupby(["sex", "age", "response_datetime", "address"])[selected_topic]
-        .count()
-        .unstack(fill_value=0)
-        .sort_index()
-        .cumsum(axis=1)
-    )
-    cumsum_radio_data = cumsum_data.div(
-        grouped_count,
-        axis=0,
-    )
-    cumsum_radio_data["agree"] = agree_neutral_disagree
-    return cumsum_radio_data
 
+    # 累積和の総計（行合計）を計算して、各列の値を割り算
+    total_cumsum = grouped.sum(axis=1)
+    cumsum_ratio = grouped.div(total_cumsum, axis=0).reset_index()
 
-@st.cache_data
-def create_dataset(
-    data: Data, selected_topic: Topics, opinion_map: OpinionMap
-) -> DataFrame[Dataset]:
-    return (
-        pd.concat(
-            [
-                create_cumsum_radio_data(data, selected_topic, i)
-                for i in opinion_map.values()
-            ]
-        )
-        .melt(ignore_index=False, value_name="cumsum", id_vars=["agree"])
-        .reset_index()
+    # melt して 'agree' 列 (賛成・中立・反対...) と 'cumsum' 列を作成
+    return cumsum_ratio.melt(
+        id_vars=["sex", "age", "response_datetime", "address"],
+        var_name="agree",
+        value_name="cumsum",
     )
 
 

@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -24,6 +23,17 @@ from src.const import (
     button_style,
 )
 
+
+@st.cache_data
+def show_opinion_nums(data, selected_topic):
+    opinion_nums = data[selected_topic].value_counts()
+    st.write("投票数", opinion_nums.sum())
+    cols = st.columns(3)
+    for i, (key, num) in enumerate(opinion_nums.to_dict().items()):
+        with cols[i]:
+            st.write(key, num)
+
+
 # ページ設定
 st.set_page_config(
     page_title="日本の政治論点ダッシュボード",
@@ -31,6 +41,15 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+if "add_new_data" in st.session_state and st.session_state.add_new_data:
+    load_data.clear()
+    create_dataset.clear()
+    merge_lonlat.clear()
+    # visualize_data_by_various_method.clear()
+    visualize_basic_pie_chart.clear()
+    show_opinion_nums.clear()
+
+data = load_data()
 
 
 @st.dialog("基本情報の入力")
@@ -58,29 +77,32 @@ if "basic_info" not in st.session_state:
 # サイドバーの作成
 st.sidebar.header("政治論点メニュー")
 
-data = load_data()
-
 # ユーザーが選択した論点
 selected_topic: Topics = st.sidebar.selectbox("論点を選択してください", topics)
 
 topics_idx = topics.index(selected_topic)
 
+
 st.header(selected_topic)
 
-visualize_basic_pie_chart(data, selected_topic)
+
+with st.container(border=True, key="opinion-values-container"):
+    show_opinion_nums(data, selected_topic)
+    visualize_basic_pie_chart(data, selected_topic)
 
 tabs = st.tabs(figure_tabs)
 
-cumsum_radio_data = create_dataset(data, selected_topic, opinion_map)
+cumsum_radio_data = create_dataset(data, selected_topic)
 
 visualize_data_by_various_method(tabs, cumsum_radio_data)
+
 
 st.markdown(
     button_style,
     unsafe_allow_html=True,
 )
 
-with st.container(border=True, key="opinion-container"):
+with st.container(border=True, key="select-opinion-container"):
     cols = st.columns(3, vertical_alignment="center", gap="medium")
     with cols[0]:
         agree = st.button("賛成", use_container_width=True)
@@ -103,10 +125,9 @@ if any([agree, neutral, disagree]):
     add_new_data(
         original, same_data, selected_topic, agree, disagree, age, sex, address
     )
-
-    load_data.clear()
-    create_dataset.clear()
-    merge_lonlat.clear()
+    del data
+    st.session_state.add_new_data = True
+    st.rerun()
 
 # フッター
 st.markdown("---")

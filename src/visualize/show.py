@@ -16,6 +16,7 @@ from .preprocess import (
 )
 
 
+@st.cache_data
 def visualize_basic_pie_chart(data: pd.DataFrame, selected_topic: Topics) -> None:
     data = preprocess_basic_pie(data, selected_topic)
     fig = px.pie(
@@ -23,7 +24,7 @@ def visualize_basic_pie_chart(data: pd.DataFrame, selected_topic: Topics) -> Non
         values="count",
         names=selected_topic,
         color=selected_topic,
-        title=selected_topic + "についての意見",
+        # title=selected_topic + "についての意見",
         category_orders={selected_topic: ["賛成", "中立", "反対"]},
         color_discrete_map=color_map,
     )
@@ -110,13 +111,14 @@ def visualize_data_by_various_method(
             lon="lon",
             color="cumsum",
             size="count",
-            color_continuous_scale=px.colors.sequential.RdBu_r,
-            size_max=15,
-            zoom=3.5,
+            color_continuous_scale=px.colors.sequential.RdBu,
+            size_max=12,
+            zoom=3.7,
             mapbox_style="carto-positron",
             hover_name="address",
             width=360,
             height=540,
+            range_color=[-1, 1],
         )
         # Streamlitで表示
         st.plotly_chart(fig, use_container_width=True)
