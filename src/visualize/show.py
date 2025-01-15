@@ -22,10 +22,9 @@ def visualize_basic_pie_chart(data: pd.DataFrame, selected_topic: Topics) -> Non
     fig = px.pie(
         data,
         values="count",
-        names=selected_topic,
-        color=selected_topic,
-        # title=selected_topic + "についての意見",
-        category_orders={selected_topic: ["賛成", "中立", "反対"]},
+        names="value",
+        color="value",
+        category_orders={"value": ["賛成", "中立", "反対"]},
         color_discrete_map=color_map,
     )
     st.plotly_chart(fig, use_container_width=True)

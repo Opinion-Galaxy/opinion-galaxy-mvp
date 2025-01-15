@@ -8,7 +8,12 @@ from ..type import Data, DatasetWithLonLat, Topics, Dataset
 
 
 def preprocess_basic_pie(data: DataFrame[Data], selected_topic: Topics) -> pd.DataFrame:
-    return data[selected_topic].value_counts().to_frame().reset_index()
+    return (
+        data.loc[data["topic"] == selected_topic, "value"]
+        .value_counts()
+        .to_frame()
+        .reset_index()
+    )
 
 
 def preprocess_time_series_area(cumsum_radio_data: DataFrame[Dataset]) -> pd.DataFrame:

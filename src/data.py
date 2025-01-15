@@ -2,31 +2,42 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from pandera.typing import DataFrame
+from logging import getLogger
 
+logger = getLogger(__name__)
+
+from src.api import usecase
 
 from .type import Data, DatasetWithLonLat, Topics
 from .const import get_prefecture_city, topics, opinion_map
 
 
 # サンプルデータの作成
-@st.cache_data
-def load_data() -> pd.DataFrame:
-    dtype_dict = {topic: "Int64" for topic in topics}
-    parse_dates = ["response_datetime"]
-
+@st.cache_data(
+    hash_funcs={
+        usecase.answer.Answer: lambda x: x.get_all_answers().shape,
+        usecase.user.User: lambda x: x.get_all_users().shape,
+    }
+)
+def load_data(usecase_answer, usecase_user) -> pd.DataFrame:
     # `opinion_map` を事前に適用するためにデータを読み込んだ後に変換
-    data = pd.read_csv(
-        "data/dummy_political_opinions_with_datetime.csv",
-        parse_dates=parse_dates,
-        dtype=dtype_dict,
-    ).sort_values("response_datetime")
-
-    # `opinion_map` の適用をベクトル化
-    for topic in topics:
-        data[topic] = (
-            data[topic].astype("Float64").astype("Int64").astype(str).map(opinion_map)
-        )
-
+    answer_data = usecase_answer.get_all_answers()
+    user_data = usecase_user.get_all_users()
+    data = pd.merge(
+        answer_data, user_data, left_on="user_id", right_on="id", how="left"
+    )
+    data["sex"] = data["is_male"].astype(bool).map({True: "男性", False: "女性"})
+    data = data.drop(columns=["id_x", "is_male", "created_at"]).rename(
+        columns={"answered_at": "response_datetime", "topic_id": "topic"}
+    )
+    data["value"] = (
+        data["value"]
+        .astype("Int64")
+        .astype("Float64")
+        .astype("Int64")
+        .astype(str)
+        .map(opinion_map)
+    )
     # 年齢のカテゴリ分けを一度に行う
     data["age"] = pd.cut(
         data["age"],
@@ -52,10 +63,10 @@ def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
     """
     # まとめて累積処理
     # groupby して各意見の件数を pivot
+    logger.info(data)
     grouped = (
-        data.groupby(["sex", "age", "response_datetime", "address", selected_topic])[
-            selected_topic
-        ]
+        data[data["topic"] == selected_topic]
+        .groupby(["sex", "age", "response_datetime", "address", "value"])["value"]
         .count()
         .unstack(level=-1, fill_value=0)  # 意見ごとに列を展開
         .sort_index(axis=1)  # 賛成・中立・反対などの列順を確定
@@ -107,8 +118,8 @@ def check_same_data(
     ]
 
     if not same_data.empty:
-        print("以下のデータがすでに存在します")
-        print(same_data)
+        logger.info("以下のデータがすでに存在します")
+        logger.info(same_data)
         if same_data[selected_topic].iloc[0] == int(agree - disagree):
             st.write("すでに同じ意見が登録されています")
             st.stop()
@@ -151,6 +162,6 @@ def add_new_data(
     if not same_data.empty:
         data = data.drop(same_data.index)
     data = pd.concat([data, new_data], axis=0, ignore_index=True)
-    print("以下のデータを追加しました")
-    print(new_data)
+    logger.info("以下のデータを追加しました")
+    logger.info(new_data)
     data.to_csv("data/dummy_political_opinions_with_datetime.csv", index=False)

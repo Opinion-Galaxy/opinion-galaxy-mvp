@@ -173,3 +173,10 @@ cython_debug/
 data/raw/
 cnf/
 .DS_Store
+
+data/*
+!data/topics.csv
+!data/comments.csv
+!data/answers.csv
+!data/users.csv
+!data/prefecture_city_lonlat.csv

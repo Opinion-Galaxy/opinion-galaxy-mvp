@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 
+
 # 論点リスト
 topics = [
     "外国人労働者の受け入れ拡大",
@@ -24,12 +25,65 @@ topics = [
     "電子政府（e-Government）の推進",
 ]
 
-opinion_map = {"-1": "反対", "0": "中立", "1": "賛成"}
+japanese_names = [
+    "佐藤太郎",
+    "鈴木花子",
+    "高橋健一",
+    "田中美咲",
+    "伊藤翔",
+    "渡辺愛",
+    "山本大輔",
+    "中村絵里",
+    "小林悠",
+    "加藤優子",
+    "吉田一郎",
+    "山田菜々子",
+    "佐々木悠斗",
+    "山口彩",
+    "松本健太",
+    "井上葵",
+    "木村龍之介",
+    "林美咲",
+    "斎藤翔太",
+    "清水結衣",
+    "山崎健",
+    "森田真奈",
+    "阿部翔",
+    "池田美穂",
+    "橋本拓海",
+    "石川葵",
+    "山下大地",
+    "松井葵",
+    "中島翔子",
+    "石井健",
+    "藤田美香",
+    "木下翔",
+    "村上優子",
+    "原田一郎",
+    "長谷川葵",
+    "小川健太",
+    "西村美咲",
+    "岡田翔太",
+    "藤井彩",
+    "田村大輔",
+    "松田美穂",
+    "菅原翔",
+    "山口真奈",
+    "坂本健",
+    "大野葵",
+    "上田悠",
+    "森健一",
+    "小山菜々子",
+    "石橋翔太",
+    "石田葵",
+]
+
+opinion_map = {"1": "賛成", "0": "中立", "-1": "反対"}
 
 color_map = {
-    "反対": px.colors.sequential.RdBu_r[-3],
-    "中立": px.colors.sequential.RdBu_r[4],
     "賛成": px.colors.sequential.RdBu_r[2],
+    "中立": px.colors.sequential.RdBu_r[4],
+    "反対": px.colors.sequential.RdBu_r[-3],
 }
 
 figure_tabs = ["意見の推移", "性別の割合", "性別・年代別の割合", "地域別の賛成割合"]
@@ -54,25 +108,3 @@ def get_prefecture_and_city_list():
 
 
 prefecture_list, city_dict = get_prefecture_and_city_list()
-
-button_style = """
-    <style>
-    div.st-key-select-opinion-container div.stColumn:nth-of-type(1) div.stButton > button:first-child {
-        background-color: rgb(67, 147, 195);
-        color: black;
-    }
-    div.st-key-select-opinion-container div.stColumn:nth-of-type(2) div.stButton > button:first-child {
-        background-color: rgb(209, 229, 240);
-        color: black;
-    }
-    div.st-key-select-opinion-container div.stColumn:nth-of-type(3) div.stButton > button:first-child {
-        background-color: rgb(214, 96, 77);
-        color: black;
-    }
-    div.st-key-select-opinion-container div.stColumn {
-        min-width: 60px;
-        justify-content: center;
-        align-content: center;
-    }
-    </style>
-"""
