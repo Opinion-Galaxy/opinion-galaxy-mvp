@@ -180,3 +180,4 @@ data/*
 !data/answers.csv
 !data/users.csv
 !data/prefecture_city_lonlat.csv
+!data/database.db
