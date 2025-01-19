@@ -181,3 +181,4 @@ data/*
 !data/users.csv
 !data/prefecture_city_lonlat.csv
 !data/database.db
+!data/japan.geojson
