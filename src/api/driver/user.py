@@ -1,17 +1,33 @@
-import pandas as pd
-
-
 class User:
-    def __init__(self):
-        self.df = pd.read_csv("data/users.csv", parse_dates=["created_at"])
+    def __init__(self, conn):
+        self.conn = conn
 
     def get(self, user_id):
-        return self.df[self.df["id"] == user_id]
+        cursor = self.conn.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        return cursor.fetchone()
+
+    def find_by_attrs(self, name, age, is_male, address):
+        cursor = self.conn.execute(
+            "SELECT * FROM users WHERE name = ? AND age = ? AND is_male = ? AND address = ?",
+            (name, age, is_male, address),
+        )
+        return cursor.fetchall()
 
     def get_all(self):
-        return self.df.copy()
+        cursor = self.conn.execute("SELECT * FROM users")
+        return cursor.fetchall()
 
     def post(self, user):
-        user_df = pd.DataFrame(user.__dict__, index=[0])
-        self.df = pd.concat([self.df, user_df], ignore_index=True)
-        self.df.to_csv("data/users.csv", index=False)
+        query = """
+        INSERT INTO users (id, name, is_male, age, address)
+        VALUES (?, ?, ?, ?, ?)
+        """
+        self.conn.execute(
+            query,
+            (user.id, user.name, user.is_male, user.age, user.address),
+        )
+        self.conn.commit()
+        return user.id  # Optionally return the new UUID
+
+    def close(self):
+        self.conn.close()

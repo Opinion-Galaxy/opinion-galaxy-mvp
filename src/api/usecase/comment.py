@@ -1,57 +1,54 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
+import streamlit as st
 import uuid
+
+import pandas as pd
 
 
 @dataclass
 class CommentEntity:
-    id: uuid.UUID
-    commented_at: datetime
-    user_id: uuid.UUID
+    user_id: str
     topic_id: int
     content: str
-    parent_id: uuid.UUID
-    favorite_count: int
-    bad_count: int
-    is_agree: int
-
-    def __init__(
-        self,
-        user_id: uuid.UUID,
-        topic_id: int,
-        comment: str,
-        parent_id: uuid.UUID = None,
-        is_agree: int = None,
-    ):
-        self.id = uuid.uuid4()
-        self.commented_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.user_id = user_id
-        self.topic_id = topic_id
-        self.content = comment
-        self.parent_id = parent_id
-        self.favorite_count = 0
-        self.bad_count = 0
-        self.is_agree = is_agree if is_agree is None else int(is_agree)
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    commented_at: datetime = field(default_factory=datetime.now)
+    parent_id: Optional[str] = None
+    favorite_count: int = 0
+    bad_count: int = 0
+    is_agree: int = 0
 
 
 class Comment:
-    def __init__(self, driver):
-        self.repository = driver.Comment()
+    def __init__(self, driver_comment):
+        self.repository = driver_comment
 
-    def get_comment(self, comment_id):
-        return self.repository.get(comment_id)
+    def get_all_comments(self):
+        comment_rows = self.repository.get_all()
+        comment_df = pd.DataFrame(comment_rows, columns=comment_rows[0].keys())
+        return comment_df
 
-    def get_comments_at_topic(self, topic_id):
-        return self.repository.find_all(topic_id=topic_id)
+    def get_comment(self, comment_id: uuid.UUID) -> CommentEntity:
+        comment_row = self.repository.get(comment_id)
+        return CommentEntity(**comment_row)
+
+    @st.cache_data
+    def get_comments_at_topic(_self, topic_id: int):
+        comment_rows = _self.repository.find_all(topic_id=topic_id)
+        comment_df = pd.DataFrame(comment_rows, columns=comment_rows[0].keys())
+        return comment_df
 
     def get_children_comments(self, parent_id):
-        return self.repository.find_all(parent_id=parent_id)
+        comment_rows = self.repository.find_all(parent_id=parent_id)
+        comment_df = pd.DataFrame(comment_rows, columns=comment_rows[0].keys())
+        return comment_df
 
     def post_comment(self, user_id, topic_id, comment, parent_id=None, is_agree=None):
         comment = CommentEntity(
             user_id=user_id,
             topic_id=topic_id,
-            comment=comment,
+            content=comment,
             parent_id=parent_id,
             is_agree=is_agree,
         )
@@ -59,7 +56,7 @@ class Comment:
 
     def reaction_at_comment(self, comment_id, favorited, baded):
         try:
-            comment = self.repository.get(comment_id)
+            comment = dict(self.repository.get(comment_id))
         except Exception:
             return None
 
@@ -68,4 +65,7 @@ class Comment:
         if baded:
             comment["bad_count"] += 1
 
-        return self.repository.put(comment_id, comment)
+        return self.repository.put(
+            comment_id,
+            CommentEntity(**comment),
+        )

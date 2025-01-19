@@ -34,7 +34,7 @@ def preprocess_time_series_area(cumsum_radio_data: DataFrame[Dataset]) -> pd.Dat
 
 
 def preprocess_pie_by_sex(cumsum_radio_data: DataFrame[Dataset]) -> DataFrame[Dataset]:
-    return cumsum_radio_data
+    return cumsum_radio_data.groupby(["sex", "agree"])["cumsum"].mean().reset_index()
 
 
 def preprocess_radar_chart_by_sex(

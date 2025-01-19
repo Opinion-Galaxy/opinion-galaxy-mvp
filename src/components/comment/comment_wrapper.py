@@ -1,3 +1,4 @@
+from time import sleep
 import pandas as pd
 from datetime import datetime
 import numpy as np
@@ -5,13 +6,19 @@ import streamlit as st
 import requests
 from io import BytesIO
 from logging import getLogger
+import aiohttp
+import asyncio
+from io import BytesIO
+from PIL import Image
+import PIL
 
+from .reaction_columns import reaction_columns
 from src.untils import format_datetime_diff
 
 logger = getLogger(__name__)
 
 avatar_size = 42
-comment_container_style = """
+comment_wrapper_style = """
 <style>
     /* rem設定 */
     html {
@@ -100,23 +107,17 @@ comment_container_style = """
 </style>
 """
 
+async def get_random_image_bytes(comment, id):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f"https://picsum.photos/id/{id + 1}/800/800.jpg?hmac=k2yTrnX-Saxlt8-IxfGhOiSb-g3Cuqt-Vgg48L0uENs") as response:
+            image_bytes = await response.read()
+            return image_bytes
 
 @st.cache_data
-def get_random_image_bytes(comment, id):
-    response = requests.get("https://picsum.photos/800")
-    return BytesIO(response.content)
+def get_random_image_id(id):
+    return np.random.randint(1, 1000)
 
-
-def on_submitted():
-    st.session_state.submitted = True
-
-
-def reset_submitted():
-    st.session_state.submitted = False
-    st.session_state.comment_val = ""
-
-
-def comment_wrapper(
+async def comment_wrapper(
     comment,
     usecase_user,
     usecase_comment,
@@ -126,18 +127,29 @@ def comment_wrapper(
     id = comment["id"]
     content = comment["content"]
     user = usecase_user.get_user(comment["user_id"])
-    name = user["name"]
+    name = user.name
     dt = comment["commented_at"]
     is_agree = comment["is_agree"]
     favorite_count = comment["favorite_count"]
     bad_count = comment["bad_count"]
+
+    image_id = get_random_image_id(id)
+
     with st.container(key=f"comment-wrapper-{id}", border=True):
         wrapper_cols = st.columns(2, vertical_alignment="center")
         with wrapper_cols[0]:
-            st.image(
-                get_random_image_bytes(content, id),
-                width=avatar_size,
-            )
+            image_bytes = await get_random_image_bytes(content, image_id)
+            if image_bytes:
+                try:
+                    # PIL で画像を検証
+                    Image.open(BytesIO(image_bytes)).verify()
+                    st.image(image_bytes)
+                except PIL.UnidentifiedImageError:
+                    logger.error("取得したデータは有効な画像ではありません。")
+                except Exception as e:
+                    logger.error(f"画像の処理中にエラーが発生しました: {e}")
+            else:
+                logger.error("画像データが取得できませんでした。")
         with wrapper_cols[1]:
             with st.container(key=f"comment-content-{id}"):
                 name_time_cols = st.columns(3)
@@ -146,73 +158,22 @@ def comment_wrapper(
                 with name_time_cols[1]:
                     st.write(
                         format_datetime_diff(
-                            datetime.now() - datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
+                            datetime.now()
+                            - datetime.strptime(dt, "%Y-%m-%d %H:%M:%S.%f")
                         )
                     )
-                if not np.isnan(is_agree):
+                if is_agree is not None and not np.isnan(is_agree):
                     with name_time_cols[2]:
                         st.write("賛成" if is_agree else "反対")
                 st.write(content)
         st.divider()
-        reaction_cols = st.columns(4, vertical_alignment="center")
-        with reaction_cols[0]:
-            agreed = st.button(
-                "賛同", key=f"agree_{id}", icon="👍", on_click=reset_submitted
-            )
-        with reaction_cols[1]:
-            disagreed = st.button(
-                "反論", key=f"disagree_{id}", icon="👎", on_click=reset_submitted
-            )
-        with reaction_cols[2]:
-            favorited = st.button(
-                str(favorite_count), key=f"favorite_{id}", icon=":material/favorite:"
-            )
-        with reaction_cols[3]:
-            baded = st.button(
-                str(bad_count), key=f"close_{id}", icon=":material/close:"
-            )
-
-        if any([agreed, disagreed]):
-            with st.form(
-                f"agree-input-{id}" if agreed else f"disagree-input-{id}",
-                border=True,
-            ):
-                st.text_area(
-                    "",
-                    placeholder="コメントを入力...",
-                    key=f"text-{id}",
-                    height=68,
-                )
-                st.form_submit_button(
-                    "賛同する" if agreed else "反論する", on_click=on_submitted
-                )
-
-        if "submitted" in st.session_state and st.session_state.submitted:
-            with st.spinner("コメントを送信中..."):
-                try:
-                    usecase_comment.post_comment(
-                        st.session_state.basic_info["user_id"],
-                        topics_idx + 1,
-                        getattr(st.session_state, f"text-{id}"),
-                        parent_id=id,
-                        is_agree=True,
-                    )
-                    st.success("コメントを送信しました")
-                except Exception as e:
-                    st.error("コメントが送信できませんでした")
-                    logger.error(e)
-            reset_submitted()
-
-        if any([favorited, baded]):
-            try:
-                usecase_comment.reaction_at_comment(id, favorited, baded)
-            except Exception as e:
-                st.error("リアクションが送信できませんでした")
-                logger.error(e)
-            st.success("❤️" if favorited else "×")
+        reaction_columns(id, favorite_count, bad_count, usecase_comment, topics_idx)
 
         if not children_comments.empty:
-            for i, child_comment in children_comments.iterrows():
+            tasks = [
                 comment_wrapper(
                     child_comment, usecase_user, usecase_comment, topics_idx
                 )
+                for _, child_comment in children_comments.iterrows()
+            ]
+            await asyncio.gather(*tasks)

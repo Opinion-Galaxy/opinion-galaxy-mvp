@@ -98,7 +98,7 @@ def get_prefecture_city():
     return prefecture_city
 
 
-@st.cache_data
+# @st.cache_data
 def get_prefecture_and_city_list():
     prefecture_city = get_prefecture_city()
     return (

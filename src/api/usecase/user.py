@@ -1,36 +1,52 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 import uuid
+
+import pandas as pd
 
 
 @dataclass
 class UserEntity:
-    id: uuid.UUID
-    created_at: datetime
     name: str
     age: int
     is_male: bool
     address: str
-    questionnaire_id: int
-
-    def __init__(self, name: str, age: int, is_male: bool, address: str):
-        self.id = uuid.uuid4()
-        self.created_at = datetime.now()
-        self.name = name
-        self.age = age
-        self.is_male = is_male
-        self.address = address
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = field(default_factory=datetime.now)
 
 
 class User:
-    def __init__(self, driver):
-        self.user_repository = driver.User()
+    def __init__(self, driver_user):
+        self.user_repository = driver_user
 
     def get_all_users(self):
-        return self.user_repository.get_all()
+        user_rows = self.user_repository.get_all()
+        user_df = pd.DataFrame(user_rows, columns=user_rows[0].keys())
+        return user_df
+
+    def get_user_by_attrs(
+        self, name: str, age: int, sex: str, address: str
+    ) -> UserEntity:
+        user_rows = self.user_repository.find_by_attrs(
+            name, age, sex == "男性", address
+        )
+        if len(user_rows) == 0:
+            return None
+        user_row = user_rows[0]
+        return UserEntity(**user_row)
 
     def get_user(self, user_id: int) -> UserEntity:
-        return self.user_repository.get(user_id).iloc[0].to_dict()
+        user_row = self.user_repository.get(user_id)
+        if user_row is None:
+            return None
+        return UserEntity(
+            id=user_id,
+            created_at=user_row["created_at"],
+            name=user_row["name"],
+            age=user_row["age"],
+            is_male=user_row["is_male"],
+            address=user_row["address"],
+        )
 
     def create_user(self, name: str, age: int, sex: str, address: str) -> uuid.UUID:
         user = UserEntity(name=name, age=age, is_male=sex == "男性", address=address)

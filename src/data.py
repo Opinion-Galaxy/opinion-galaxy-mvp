@@ -19,7 +19,9 @@ from .const import get_prefecture_city, topics, opinion_map
         usecase.user.User: lambda x: x.get_all_users().shape,
     }
 )
-def load_data(usecase_answer, usecase_user) -> pd.DataFrame:
+def load_data(
+    usecase_answer: usecase.answer.Answer, usecase_user: usecase.answer.Answer
+) -> pd.DataFrame:
     # `opinion_map` を事前に適用するためにデータを読み込んだ後に変換
     answer_data = usecase_answer.get_all_answers()
     user_data = usecase_user.get_all_users()
@@ -28,7 +30,7 @@ def load_data(usecase_answer, usecase_user) -> pd.DataFrame:
     )
     data["sex"] = data["is_male"].astype(bool).map({True: "男性", False: "女性"})
     data = data.drop(columns=["id_x", "is_male", "created_at"]).rename(
-        columns={"answered_at": "response_datetime", "topic_id": "topic"}
+        columns={"answered_at": "response_datetime", "id_y": "id"}
     )
     data["value"] = (
         data["value"]
@@ -45,10 +47,11 @@ def load_data(usecase_answer, usecase_user) -> pd.DataFrame:
         labels=[f"{i}代" for i in range(10, 90, 10)],
         right=False,
     )
-
     # 日付フォーマットを一度に適用
-    data["response_datetime"] = data["response_datetime"].dt.strftime("%Y-%m-%d")
-
+    data["response_datetime"] = pd.to_datetime(data["response_datetime"]).dt.strftime(
+        "%Y-%m-%d"
+    )
+    data = merge_lonlat(data)
     return data
 
 
@@ -63,7 +66,7 @@ def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
     """
     # まとめて累積処理
     # groupby して各意見の件数を pivot
-    logger.info(data)
+    logger.info("data", data)
     grouped = (
         data[data["topic"] == selected_topic]
         .groupby(["sex", "age", "response_datetime", "address", "value"])["value"]
@@ -85,7 +88,6 @@ def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
     )
 
 
-@st.cache_data
 def merge_lonlat(data: pd.DataFrame) -> DataFrame[DatasetWithLonLat]:
     prefecture_city = get_prefecture_city()
     prefecture_city["address"] = (
@@ -104,64 +106,64 @@ def merge_lonlat(data: pd.DataFrame) -> DataFrame[DatasetWithLonLat]:
     return data
 
 
-def check_same_data(
-    data: Data,
-    selected_topic: Topics,
-    agree: bool,
-    disagree: bool,
-    age: str,
-    sex: str,
-    address: str,
-) -> pd.DataFrame:
-    same_data = data[
-        (data["age"] == age) & (data["sex"] == sex) & (data["address"] == address)
-    ]
+# def check_same_data(
+#     data: Data,
+#     selected_topic: Topics,
+#     agree: bool,
+#     disagree: bool,
+#     age: str,
+#     sex: str,
+#     address: str,
+# ) -> pd.DataFrame:
+#     same_data = data[
+#         (data["age"] == age) & (data["sex"] == sex) & (data["address"] == address)
+#     ]
 
-    if not same_data.empty:
-        logger.info("以下のデータがすでに存在します")
-        logger.info(same_data)
-        if same_data[selected_topic].iloc[0] == int(agree - disagree):
-            st.write("すでに同じ意見が登録されています")
-            st.stop()
+#     if not same_data.empty:
+#         logger.info("以下のデータがすでに存在します")
+#         logger.info(same_data)
+#         if same_data[selected_topic].iloc[0] == int(agree - disagree):
+#             st.write("すでに同じ意見が登録されています")
+#             st.stop()
 
-    return same_data
+#     return same_data
 
 
-def add_new_data(
-    data: Data,
-    same_data: pd.DataFrame,
-    selected_topic: Topics,
-    agree: bool,
-    disagree: bool,
-    age: str,
-    sex: str,
-    address: str,
-) -> None:
-    existed_data = (
-        {topic: np.nan for topic in (set(topics) - {selected_topic})}
-        if same_data.empty
-        else same_data[list(set(topics) - {selected_topic})]
-        .iloc[0]
-        .astype("Int64")
-        .to_dict()
-    )
-    existed_data["ID"] = (
-        same_data["ID"].iloc[0] if not same_data.empty else data["ID"].max() + 1
-    )
-    new_data = pd.DataFrame(
-        {
-            "response_datetime": pd.Timestamp.now(),
-            "age": age,
-            "sex": sex,
-            "address": address,
-            selected_topic: int(agree - disagree),
-            **existed_data,
-        },
-        index=[0],
-    )
-    if not same_data.empty:
-        data = data.drop(same_data.index)
-    data = pd.concat([data, new_data], axis=0, ignore_index=True)
-    logger.info("以下のデータを追加しました")
-    logger.info(new_data)
-    data.to_csv("data/dummy_political_opinions_with_datetime.csv", index=False)
+# def add_new_data(
+#     data: Data,
+#     same_data: pd.DataFrame,
+#     selected_topic: Topics,
+#     agree: bool,
+#     disagree: bool,
+#     age: str,
+#     sex: str,
+#     address: str,
+# ) -> None:
+#     existed_data = (
+#         {topic: np.nan for topic in (set(topics) - {selected_topic})}
+#         if same_data.empty
+#         else same_data[list(set(topics) - {selected_topic})]
+#         .iloc[0]
+#         .astype("Int64")
+#         .to_dict()
+#     )
+#     existed_data["ID"] = (
+#         same_data["ID"].iloc[0] if not same_data.empty else data["ID"].max() + 1
+#     )
+#     new_data = pd.DataFrame(
+#         {
+#             "response_datetime": pd.Timestamp.now(),
+#             "age": age,
+#             "sex": sex,
+#             "address": address,
+#             selected_topic: int(agree - disagree),
+#             **existed_data,
+#         },
+#         index=[0],
+#     )
+#     if not same_data.empty:
+#         data = data.drop(same_data.index)
+#     data = pd.concat([data, new_data], axis=0, ignore_index=True)
+#     logger.info("以下のデータを追加しました")
+#     logger.info(new_data)
+#     data.to_csv("data/dummy_political_opinions_with_datetime.csv", index=False)
