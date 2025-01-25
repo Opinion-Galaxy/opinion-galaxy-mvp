@@ -1,22 +1,20 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
-from pandera.typing import DataFrame
 from logging import getLogger
 
 logger = getLogger(__name__)
 
 from src.api import usecase
 
-from .type import Data, DatasetWithLonLat, Topics
-from .const import get_prefecture_city, topics, opinion_map
+from .const import opinion_map
 
 
 # サンプルデータの作成
 @st.cache_data(
     hash_funcs={
-        usecase.answer.Answer: lambda x: x.get_all_answers().shape,
-        usecase.user.User: lambda x: x.get_all_users().shape,
+        usecase.answer.Answer: lambda x: len(x.get_all_answers()),
+        usecase.user.User: lambda x: len(x.get_all_users()),
     }
 )
 def load_data(
@@ -51,7 +49,6 @@ def load_data(
     data["response_datetime"] = pd.to_datetime(data["response_datetime"]).dt.strftime(
         "%Y-%m-%d"
     )
-    data = merge_lonlat(data)
     return data
 
 
@@ -69,11 +66,11 @@ def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
     logger.info("data", data)
     grouped = (
         data[data["topic"] == selected_topic]
-        .groupby(["sex", "age", "response_datetime", "address", "value"])["value"]
+        .groupby(["sex", "age", "response_datetime", "prefecture", "value"])["value"]
         .count()
         .unstack(level=-1, fill_value=0)  # 意見ごとに列を展開
         .sort_index(axis=1)  # 賛成・中立・反対などの列順を確定
-        .sort_index()  # index 軸([sex, age, response_datetime, address])の順序も確定
+        .sort_index()  # index 軸([sex, age, response_datetime, prefecture, city])の順序も確定
     )
 
     # 累積和の総計（行合計）を計算して、各列の値を割り算
@@ -82,88 +79,25 @@ def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
 
     # melt して 'agree' 列 (賛成・中立・反対...) と 'cumsum' 列を作成
     return cumsum_ratio.melt(
-        id_vars=["sex", "age", "response_datetime", "address"],
+        id_vars=["sex", "age", "response_datetime", "prefecture"],
         var_name="agree",
         value_name="cumsum",
     )
 
 
-def merge_lonlat(data: pd.DataFrame) -> DataFrame[DatasetWithLonLat]:
-    prefecture_city = get_prefecture_city()
-    prefecture_city["address"] = (
-        prefecture_city["都道府県名"] + prefecture_city["市区町村名"]
-    )
-    prefecture_city_lonlat = (
-        prefecture_city.groupby(["address"])[["緯度", "経度"]]
-        .mean()
-        .reset_index()
-        .rename(columns={"緯度": "lat", "経度": "lon"})
-    )
-    data = data.merge(
-        prefecture_city_lonlat, how="left", left_on="address", right_on="address"
-    )
-    del prefecture_city, prefecture_city_lonlat
-    return data
-
-
-# def check_same_data(
-#     data: Data,
-#     selected_topic: Topics,
-#     agree: bool,
-#     disagree: bool,
-#     age: str,
-#     sex: str,
-#     address: str,
-# ) -> pd.DataFrame:
-#     same_data = data[
-#         (data["age"] == age) & (data["sex"] == sex) & (data["address"] == address)
-#     ]
-
-#     if not same_data.empty:
-#         logger.info("以下のデータがすでに存在します")
-#         logger.info(same_data)
-#         if same_data[selected_topic].iloc[0] == int(agree - disagree):
-#             st.write("すでに同じ意見が登録されています")
-#             st.stop()
-
-#     return same_data
-
-
-# def add_new_data(
-#     data: Data,
-#     same_data: pd.DataFrame,
-#     selected_topic: Topics,
-#     agree: bool,
-#     disagree: bool,
-#     age: str,
-#     sex: str,
-#     address: str,
-# ) -> None:
-#     existed_data = (
-#         {topic: np.nan for topic in (set(topics) - {selected_topic})}
-#         if same_data.empty
-#         else same_data[list(set(topics) - {selected_topic})]
-#         .iloc[0]
-#         .astype("Int64")
-#         .to_dict()
+# def merge_lonlat(data: pd.DataFrame) -> DataFrame[DatasetWithLonLat]:
+#     prefecture_city = get_prefecture_city()
+#     prefecture_city["prefecture", "city"] = (
+#         prefecture_city["都道府県名"] + prefecture_city["市区町村名"]
 #     )
-#     existed_data["ID"] = (
-#         same_data["ID"].iloc[0] if not same_data.empty else data["ID"].max() + 1
+#     prefecture_city_lonlat = (
+#         prefecture_city.groupby(["prefecture", "city"])[["緯度", "経度"]]
+#         .mean()
+#         .reset_index()
+#         .rename(columns={"緯度": "lat", "経度": "lon"})
 #     )
-#     new_data = pd.DataFrame(
-#         {
-#             "response_datetime": pd.Timestamp.now(),
-#             "age": age,
-#             "sex": sex,
-#             "address": address,
-#             selected_topic: int(agree - disagree),
-#             **existed_data,
-#         },
-#         index=[0],
+#     data = data.merge(
+#         prefecture_city_lonlat, how="left", left_on="prefecture", "city", right_on="prefecture", "city"
 #     )
-#     if not same_data.empty:
-#         data = data.drop(same_data.index)
-#     data = pd.concat([data, new_data], axis=0, ignore_index=True)
-#     logger.info("以下のデータを追加しました")
-#     logger.info(new_data)
-#     data.to_csv("data/dummy_political_opinions_with_datetime.csv", index=False)
+#     del prefecture_city, prefecture_city_lonlat
+#     return data

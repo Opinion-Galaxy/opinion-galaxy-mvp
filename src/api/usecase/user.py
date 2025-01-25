@@ -10,7 +10,8 @@ class UserEntity:
     name: str
     age: int
     is_male: bool
-    address: str
+    prefecture: str
+    city: str
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     created_at: datetime = field(default_factory=datetime.now)
 
@@ -25,10 +26,10 @@ class User:
         return user_df
 
     def get_user_by_attrs(
-        self, name: str, age: int, sex: str, address: str
+        self, name: str, age: int, sex: str, prefecture: str, city: str
     ) -> UserEntity:
         user_rows = self.user_repository.find_by_attrs(
-            name, age, sex == "男性", address
+            name, age, sex == "男性", prefecture, city
         )
         if len(user_rows) == 0:
             return None
@@ -45,10 +46,11 @@ class User:
             name=user_row["name"],
             age=user_row["age"],
             is_male=user_row["is_male"],
-            address=user_row["address"],
+            prefecture=user_row["prefecture"],
+            city=user_row["city"]
         )
 
-    def create_user(self, name: str, age: int, sex: str, address: str) -> uuid.UUID:
-        user = UserEntity(name=name, age=age, is_male=sex == "男性", address=address)
+    def create_user(self, user_id, name: str, age: int, sex: str, prefecture: str, city: str) -> uuid.UUID:
+        user = UserEntity(id=user_id, name=name, age=age, is_male=sex == "男性", prefecture=prefecture, city=city)
         self.user_repository.post(user)
         return user.id

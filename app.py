@@ -3,6 +3,8 @@ import sqlite3
 import pandas as pd
 import streamlit as st
 
+from src.firebase.auth import logout
+from streamlit_javascript import st_javascript
 # ページ設定
 st.set_page_config(
     page_title="日本の政治論点ダッシュボード",
@@ -11,6 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+from src.components.siginin_dialog import login_dialog
 from src.visualize.show import (
     show_pie_by_sex,
     show_radar_chart,
@@ -31,11 +34,13 @@ from src.components import (
     basic_info_dialog,
     select_opinion_container,
     select_opinion_style,
+    share_container,
     visualize_tabs,
 )
 
-pd.set_option("display.max_columns", 100)
+from src.style import sanitize_style, get_theme_js
 
+pd.set_option("display.max_columns", 100)
 
 # -------------------
 # Cached Database Connection
@@ -45,7 +50,6 @@ def get_db_connection(db_path="data/database.db"):
     conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
-
 
 # -------------------
 # Cached Class Instances
@@ -92,6 +96,10 @@ usecase_user, usecase_comment, usecase_answer = (
     usecase.Answer(answer_driver),
 )
 
+theme = st_javascript(get_theme_js)
+
+st.markdown(sanitize_style, unsafe_allow_html=True)
+
 
 topics = [row["topic"] for row in topic_driver.get_all()]
 
@@ -114,44 +122,53 @@ st.sidebar.header("政治論点メニュー")
 # ユーザーが選択した論点
 selected_topic: Topics = st.sidebar.selectbox("論点を選択してください", topics)
 
+
+st.sidebar.divider()
+cols = st.sidebar.columns(2)
+with cols[0]:
+    basic_info_button = st.button(
+        "基本情報を変更する",
+        key="basic-info-button",
+    )
+with cols[1]:
+    st.button("ログアウト", key="logout-button", on_click=logout)
+
 ################################
 # ユーザー基本情報
 ################################
+if "user" not in st.session_state or not st.session_state.user:
+    login_dialog()
+    st.stop()
 
+user_info = usecase_user.get_user(st.session_state.user["localId"])
 
-def open_basic_info_dialog(usecase_user):
-    def _open_basic_info_dialog():
-        basic_info_dialog(usecase_user)
+if user_info:
+    st.session_state.basic_info = {
+        "name": user_info.name,
+        "age": user_info.age,
+        "sex": "男性" if user_info.is_male else "女性",
+        "prefecture": user_info.prefecture,
+        "city": user_info.city
+    }
 
-    return _open_basic_info_dialog
-
-
-basic_info_button = st.sidebar.button(
-    "基本情報を変更する",
-    key="basic-info-button",
-)
 # ユーザー情報の変更
-if basic_info_button or (
+if "basic_info" not in st.session_state or basic_info_button or (
     "basic_info_button" in st.session_state and st.session_state.basic_info_button
 ):
     basic_info_dialog(usecase_user)
     st.session_state.basic_info_button = False
-
-# ユーザー情報の初期画面
-if "basic_info" not in st.session_state:
-    basic_info_dialog(usecase_user)
-    st.stop()
+    # ユーザー情報の初期画面
+    if "basic_info" not in st.session_state:
+        st.stop()   
 
 topics_idx = topics.index(selected_topic)
 
 st.header(selected_topic)
-
-
 ################################
 # データの可視化
 ################################
 @st.fragment
-async def visualize():
+def visualize():
     # ---------------------
     # 投票数の表示
     # ---------------------
@@ -160,7 +177,7 @@ async def visualize():
     # ---------------------
     # 意見の可視化
     # ---------------------
-    await visualize_tabs(data, selected_topic)
+    visualize_tabs(data, selected_topic)
 
     # ---------------------
     # 意見の投稿
@@ -169,23 +186,18 @@ async def visualize():
         select_opinion_style,
         unsafe_allow_html=True,
     )
+    select_opinion_container(usecase_answer, selected_topic, topics_idx)
 
 
-    await select_opinion_container(usecase_answer, selected_topic, topics_idx)
+visualize()
 
-try:
-    loop = asyncio.get_event_loop()
-except RuntimeError:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-loop.run_until_complete(visualize())
-
+share_container(theme)
 # ---------------------
 # コメントの投稿
 # ---------------------
 st.markdown(comment_wrapper_style, unsafe_allow_html=True)
 
-st.header("コメント")
+st.subheader("コメント")
 comment_container(usecase_comment, usecase_user, topics_idx)
 
 

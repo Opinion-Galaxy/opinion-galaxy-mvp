@@ -152,7 +152,7 @@ async def comment_wrapper(
                 logger.error("画像データが取得できませんでした。")
         with wrapper_cols[1]:
             with st.container(key=f"comment-content-{id}"):
-                name_time_cols = st.columns(3)
+                name_time_cols = st.columns(3 if is_agree is not None and not np.isnan(is_agree) else 2)
                 with name_time_cols[0]:
                     st.write(name)
                 with name_time_cols[1]:

@@ -2,8 +2,6 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from pandera.typing import DataFrame
-
-from ..data import merge_lonlat
 from ..type import Data, DatasetWithLonLat, Topics, Dataset
 
 
@@ -55,17 +53,17 @@ def preprocess_geo_scatter(
 ) -> DataFrame[DatasetWithLonLat]:
     count = (
         cumsum_radio_data.dropna(subset="cumsum", how="any")
-        .groupby("address")["agree"]
+        .groupby(["prefecture"])["agree"]
         .count()
         .rename("count")
         .reset_index()
     )
-    cumsum_radio_data.loc[cumsum_radio_data["agree"] == "反対", "cumsum"] *= -1
+    cumsum_radio_data = cumsum_radio_data[cumsum_radio_data["agree"] == "賛成"]
     cumsum_radio_data_by_city = (
         cumsum_radio_data.dropna(subset="cumsum")
-        .groupby("address")["cumsum"]
+        .groupby(["prefecture", "agree"])["cumsum"]
         .mean()
         .reset_index()
     )
-    cumsum_radio_data = cumsum_radio_data_by_city.merge(count, how="left", on="address")
-    return merge_lonlat(cumsum_radio_data).dropna(subset=["count"], how="any")
+    cumsum_radio_data = cumsum_radio_data_by_city.merge(count, how="left", on="prefecture")
+    return cumsum_radio_data.dropna(subset=["count"], how="any")

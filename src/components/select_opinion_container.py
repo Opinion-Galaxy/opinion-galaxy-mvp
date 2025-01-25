@@ -5,7 +5,7 @@ select_opinion_style = """
     <style>
     div.st-key-select-opinion-container div.stColumn:nth-of-type(1) div.stButton > button:first-child {
         background-color: rgb(67, 147, 195);
-        color: black;
+        color: white;
     }
     div.st-key-select-opinion-container div.stColumn:nth-of-type(2) div.stButton > button:first-child {
         background-color: rgb(209, 229, 240);
@@ -13,7 +13,7 @@ select_opinion_style = """
     }
     div.st-key-select-opinion-container div.stColumn:nth-of-type(3) div.stButton > button:first-child {
         background-color: rgb(214, 96, 77);
-        color: black;
+        color: white;
     }
     div.st-key-select-opinion-container div.stColumn {
         min-width: 60px;
@@ -27,12 +27,15 @@ select_opinion_style = """
         font-size: 1.5rem;
         font-weight: bold;
     }
+    div.st-key-select-opinion-container div.stColumn div.stButton {
+        min-width: 80px;
+    }
     </style>
 """
 
 
-async def select_opinion_container(usecase_answer, selected_topic, topics_idx):
-    user_id = st.session_state.basic_info["user_id"]
+def select_opinion_container(usecase_answer, selected_topic, topics_idx):
+    user_id = st.session_state.user["localId"]
     user_answers = usecase_answer.get_user_answers(user_id)
     no_answered = (
         user_answers.empty
@@ -78,4 +81,4 @@ async def select_opinion_container(usecase_answer, selected_topic, topics_idx):
             ].values[0]
             usecase_answer.update_answer(id, value)
         st.session_state.add_new_data = True
-        st.rerun()
+        st.rerun(scope="fragment")

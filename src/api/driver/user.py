@@ -6,10 +6,10 @@ class User:
         cursor = self.conn.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         return cursor.fetchone()
 
-    def find_by_attrs(self, name, age, is_male, address):
+    def find_by_attrs(self, name, age, is_male, prefecture, city):
         cursor = self.conn.execute(
-            "SELECT * FROM users WHERE name = ? AND age = ? AND is_male = ? AND address = ?",
-            (name, age, is_male, address),
+            "SELECT * FROM users WHERE name = ? AND age = ? AND is_male = ? AND prefecture = ? AND city = ?",
+            (name, age, is_male, prefecture, city),
         )
         return cursor.fetchall()
 
@@ -19,12 +19,12 @@ class User:
 
     def post(self, user):
         query = """
-        INSERT INTO users (id, name, is_male, age, address)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO users (id, name, is_male, age, prefecture, city)
+        VALUES (?, ?, ?, ?, ?, ?)
         """
         self.conn.execute(
             query,
-            (user.id, user.name, user.is_male, user.age, user.address),
+            (user.id, user.name, user.is_male, user.age, user.prefecture, user.city),
         )
         self.conn.commit()
         return user.id  # Optionally return the new UUID
