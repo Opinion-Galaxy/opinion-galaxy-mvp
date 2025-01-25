@@ -1,10 +1,8 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
+import streamlit as st
+print(st.secrets["FIREBASE_API_KEY"])
 firebaseConfig = {
-  "apiKey": os.environ.get("FIREBASE_API_KEY"),
+  "apiKey": st.secrets["FIREBASE_API_KEY"],
   "authDomain": "opinion-galaxy.firebaseapp.com",
   # "projectId": "opinion-galaxy",
   "storageBucket": "opinion-galaxy.firebasestorage.app",
