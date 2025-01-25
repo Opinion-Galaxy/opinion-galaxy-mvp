@@ -11,7 +11,7 @@ get_theme_js = """window.getComputedStyle(window.parent.document.getElementsByCl
 sanitize_style = """
     <style>
     p, ol, ul, dl {
-        margin: 0px;
+        margin: 0px 0px 1rem;
         padding: 0px;
         font-size: 1rem;
         font-weight: 400;
@@ -28,6 +28,9 @@ sanitize_style = """
     }
     .stColumn div {
         justify-items: center;
+        margin: 0;
+    }
+    .stColumn p {
         margin: 0;
     }
     </style>

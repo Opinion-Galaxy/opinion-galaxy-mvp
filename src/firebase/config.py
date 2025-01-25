@@ -1,6 +1,5 @@
-import os
 import streamlit as st
-print(st.secrets["FIREBASE_API_KEY"])
+
 firebaseConfig = {
   "apiKey": st.secrets["FIREBASE_API_KEY"],
   "authDomain": "opinion-galaxy.firebaseapp.com",
