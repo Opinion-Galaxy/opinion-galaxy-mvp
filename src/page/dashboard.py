@@ -35,6 +35,13 @@ dashboard_style = """
     div[class*='clear']  div.stElementContainer div[data-testid='stMetricValue'] > div {
         color: #4393c3;
     }
+    div[class*='st-key-dashboard-container-'] div.stPageLink a {
+        padding: 0;
+    }
+    div[class*='st-key-dashboard-container-'] div.stPageLink a p{
+        white-space: break-spaces;
+        line-height: 1.4;
+    }
 </style>
 """
 
