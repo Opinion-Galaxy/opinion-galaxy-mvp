@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 conn = get_db_connection()
 topic_driver = get_topic_instance(conn)
 st.session_state.topics = [row["topic"] for row in topic_driver.get_all()]
+topics = st.session_state.topics
 user_driver, comment_driver, answer_driver = (
     get_user_driver_instance(conn),
     get_comment_driver_instance(conn),
@@ -60,16 +61,8 @@ login_page = st.Page(lambda: login(usecase_user, user_info_page), title="ログ�
 
 logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
 
-dashboard_page = st.Page(
-    dashboard,
-    title="ダッシュボード", 
-    icon=":material/dashboard:",
-    default=True
-)
 
-
-pages =[]
-for selected_topic in st.session_state.topics:
+def template_wrapper(selected_topic):
     def template():
         try:
             generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
@@ -78,18 +71,30 @@ for selected_topic in st.session_state.topics:
             st.error("エラーが発生しました")
             st.button("リロード", on_click=st.rerun)
         footer()
-    template.__name__ = selected_topic
-
+    return template
+pages =[]
+for selected_topic in topics:
     pages.append(
-         st.Page(template, title=selected_topic, url_path=selected_topic, icon=":material/stacked_line_chart:")
+         st.Page(template_wrapper(selected_topic), title=selected_topic, url_path=selected_topic, icon=":material/stacked_line_chart:")
     )
 
+dashboard_page = st.Page(
+    lambda: dashboard(st.session_state.topics, pages, usecase_answer, usecase_user),
+    title="ダッシュボード", 
+    icon=":material/dashboard:",
+    default=True
+)
+# if "user" in st.session_state:
+#     print(st.session_state.user)
+# if "basic_info" in st.session_state:
+#     print(st.session_state.basic_info)
+# print(st.session_state)
 pg = st.navigation(
     {
         "アカウント": [dashboard_page, user_info_page , logout_page],
         "トピック": pages
     } if "user" in st.session_state and st.session_state.user and "basic_info" in st.session_state and st.session_state.basic_info else [
-        login_page, user_info_page 
+        login_page, user_info_page
     ]
 )
 

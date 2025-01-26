@@ -48,8 +48,7 @@ def visualize(data, selected_topic, usecase_answer, topics_idx):
 
 
 def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer):
-
-
+    print(selected_topic)
     if "add_new_data" in st.session_state and st.session_state.add_new_data:
         load_data.clear()
         create_dataset.clear()

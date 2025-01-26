@@ -4,7 +4,6 @@ from streamlit_javascript import st_javascript
 import base64
 from ..style import get_theme_js
 import urllib.parse
-from streamlit_theme import st_theme
 
 
 def get_base64_of_bin_file(bin_file):
