@@ -10,6 +10,10 @@ get_theme_js = """window.getComputedStyle(window.parent.document.getElementsByCl
 
 sanitize_style = """
     <style>
+    /* rem設定 */
+    html {
+        font-size: 15px;
+    }
     p, ol, ul, dl {
         margin: 0px 0px 1rem;
         padding: 0px;
@@ -27,7 +31,7 @@ sanitize_style = """
         }
     }
     .stColumn div {
-        justify-items: center;
+        justify-items: left;
         margin: 0;
     }
     .stColumn p {

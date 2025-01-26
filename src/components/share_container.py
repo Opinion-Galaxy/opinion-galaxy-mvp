@@ -2,15 +2,23 @@ from typing import Literal
 import streamlit as st
 from streamlit_javascript import st_javascript
 import base64
+from ..style import get_theme_js
+import urllib.parse
+from streamlit_theme import st_theme
+
 
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
     return base64.b64encode(data).decode()
 
-def share_container(theme: Literal["light", "dark"]):
+def share_container(selected_topic):
     st.subheader("共有")
-    url = st_javascript("""await fetch('').then(r => window.parent.location.href)""")
+    theme = st_javascript(get_theme_js)
+    # theme = 'light'
+    session = st.runtime.get_instance()._session_mgr.list_active_sessions()[0]
+    url = urllib.parse.urlunparse([session.client.request.protocol, session.client.request.host, "", "", "", ""]) + "/" + selected_topic
+
     with st.container(border=True, key="share-container"):
         cols = st.columns(4, vertical_alignment="center")
         with cols[0]:

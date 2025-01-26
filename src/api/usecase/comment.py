@@ -13,7 +13,7 @@ class CommentEntity:
     topic_id: int
     content: str
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    commented_at: datetime = field(default_factory=datetime.now)
+    commented_at: datetime = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     parent_id: Optional[str] = None
     favorite_count: int = 0
     bad_count: int = 0

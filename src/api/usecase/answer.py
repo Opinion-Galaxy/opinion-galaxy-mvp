@@ -11,7 +11,7 @@ class AnswerEntity:
     topic_id: int
     value: str
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    answered_at: datetime = field(default_factory=datetime.now)
+    answered_at: datetime = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 
 class Answer:

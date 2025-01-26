@@ -1,10 +1,7 @@
-import asyncio
-import sqlite3
 import pandas as pd
 import streamlit as st
+import logging
 
-from src.firebase.auth import logout
-from streamlit_javascript import st_javascript
 # ページ設定
 st.set_page_config(
     page_title="日本の政治論点ダッシュボード",
@@ -12,194 +9,90 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+from src.database import get_db_connection, get_topic_instance, get_user_driver_instance, get_comment_driver_instance, get_answer_driver_instance
+from src.firebase.auth import logout
 
-from src.components.siginin_dialog import login_dialog
-from src.visualize.show import (
-    show_pie_by_sex,
-    show_radar_chart,
-    show_scatter_geo,
-    show_time_series_area,
-)
-
-from src.visualize import (
-    visualize_basic_pie_chart,
-)
-from src.type import Topics
-from src.data import load_data, create_dataset
-from src.api import driver, usecase
 from src.components import (
-    comment_container,
-    comment_wrapper_style,
-    opinion_info,
-    basic_info_dialog,
-    select_opinion_container,
-    select_opinion_style,
-    share_container,
-    visualize_tabs,
+    footer,
+    basic_info,
+    login,
 )
+from src.page import (
+    dashboard,
+    generate_page
+)
+from src.api import usecase
 
 from src.style import sanitize_style, get_theme_js
 
 pd.set_option("display.max_columns", 100)
 
-# -------------------
-# Cached Database Connection
-# -------------------
-@st.cache_resource
-def get_db_connection(db_path="data/database.db"):
-    conn = sqlite3.connect(db_path, check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# -------------------
-# Cached Class Instances
-# -------------------
-@st.cache_resource(hash_funcs={sqlite3.Connection: id})
-def get_user_driver_instance(conn: sqlite3.Connection):
-    return driver.User(conn)
-
-
-@st.cache_resource(hash_funcs={sqlite3.Connection: id})
-def get_comment_driver_instance(conn):
-    return driver.Comment(conn)
-
-
-@st.cache_resource(hash_funcs={sqlite3.Connection: id})
-def get_answer_driver_instance(conn):
-    return driver.Answer(conn)
-
-
-@st.cache_resource(hash_funcs={sqlite3.Connection: id})
-def get_topic_instance(conn):
-    return driver.Topic(conn)
-
+logger = logging.getLogger(__name__)
 
 # Initialize cached resources
 conn = get_db_connection()
-
-user_driver, comment_driver, answer_driver, topic_driver = (
+topic_driver = get_topic_instance(conn)
+st.session_state.topics = [row["topic"] for row in topic_driver.get_all()]
+user_driver, comment_driver, answer_driver = (
     get_user_driver_instance(conn),
     get_comment_driver_instance(conn),
     get_answer_driver_instance(conn),
-    get_topic_instance(conn),
 )
-
-
-@st.cache_resource(hash_funcs={driver.Comment: lambda x: len(x.get_all())})
-def get_comment_usecace_instance():
-    return usecase.Comment(comment_driver)
-
 
 usecase_user, usecase_comment, usecase_answer = (
     usecase.User(user_driver),
     usecase.Comment(comment_driver),
     usecase.Answer(answer_driver),
 )
-
-theme = st_javascript(get_theme_js)
-
-st.markdown(sanitize_style, unsafe_allow_html=True)
-
-
-topics = [row["topic"] for row in topic_driver.get_all()]
-
-if "add_new_data" in st.session_state and st.session_state.add_new_data:
-    load_data.clear()
-    create_dataset.clear()
-    show_time_series_area.clear()
-    show_pie_by_sex.clear()
-    show_radar_chart.clear()
-    show_scatter_geo.clear()
-    visualize_basic_pie_chart.clear()
-    opinion_info.clear()
-    st.session_state.add_new_data = False
-
-data = load_data(usecase_answer, usecase_user)
-
-# サイドバーの作成
-st.sidebar.header("政治論点メニュー")
-
-# ユーザーが選択した論点
-selected_topic: Topics = st.sidebar.selectbox("論点を選択してください", topics)
-
-
-st.sidebar.divider()
-cols = st.sidebar.columns(2)
-with cols[0]:
-    basic_info_button = st.button(
-        "基本情報を変更する",
-        key="basic-info-button",
-    )
-with cols[1]:
-    st.button("ログアウト", key="logout-button", on_click=logout)
+# topics = ['外国人労働者の受け入れ拡大', '子育て支援の充実', 'インフラ投資の強化', 'イノベーションの促進', '防衛力の強化', '憲法９条の改正', '再生可能エネルギーの導入促進', 'エネルギー安全保障の確保', '日米同盟の廃止', '教育格差の是正', '地域資源の活用', '働き方の多様化', '労働法制の整備', '在宅医療の推進', '介護人材の確保', '医療費の持続可能性確保', 'サイバーセキュリティの強化', '電子政府（e-Government）の推進']
 
 ################################
 # ユーザー基本情報
 ################################
-if "user" not in st.session_state or not st.session_state.user:
-    login_dialog()
-    st.stop()
 
-user_info = usecase_user.get_user(st.session_state.user["localId"])
+user_info_page = st.Page(
+    lambda: basic_info(usecase_user),
+    title="ユーザー情報",
+    url_path="user_info",
+    icon=":material/account_circle:"
+)
+login_page = st.Page(lambda: login(usecase_user, user_info_page), title="ログイン", icon=":material/login:")
 
-if user_info:
-    st.session_state.basic_info = {
-        "name": user_info.name,
-        "age": user_info.age,
-        "sex": "男性" if user_info.is_male else "女性",
-        "prefecture": user_info.prefecture,
-        "city": user_info.city
-    }
+logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
 
-# ユーザー情報の変更
-if "basic_info" not in st.session_state or basic_info_button or (
-    "basic_info_button" in st.session_state and st.session_state.basic_info_button
-):
-    basic_info_dialog(usecase_user)
-    st.session_state.basic_info_button = False
-    # ユーザー情報の初期画面
-    if "basic_info" not in st.session_state:
-        st.stop()   
+dashboard_page = st.Page(
+    dashboard,
+    title="ダッシュボード", 
+    icon=":material/dashboard:",
+    default=True
+)
 
-topics_idx = topics.index(selected_topic)
 
-st.header(selected_topic)
-################################
-# データの可視化
-################################
-@st.fragment
-def visualize():
-    # ---------------------
-    # 投票数の表示
-    # ---------------------
-    opinion_info(data, selected_topic)
+pages =[]
+for selected_topic in st.session_state.topics:
+    def template():
+        try:
+            generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
+        except Exception as e:
+            logger.error(e)
+            st.error("エラーが発生しました")
+            st.button("リロード", on_click=st.rerun)
+        footer()
+    template.__name__ = selected_topic
 
-    # ---------------------
-    # 意見の可視化
-    # ---------------------
-    visualize_tabs(data, selected_topic)
-
-    # ---------------------
-    # 意見の投稿
-    # ---------------------
-    st.markdown(
-        select_opinion_style,
-        unsafe_allow_html=True,
+    pages.append(
+         st.Page(template, title=selected_topic, url_path=selected_topic, icon=":material/stacked_line_chart:")
     )
-    select_opinion_container(usecase_answer, selected_topic, topics_idx)
 
+pg = st.navigation(
+    {
+        "アカウント": [dashboard_page, user_info_page , logout_page],
+        "トピック": pages
+    } if "user" in st.session_state and st.session_state.user and "basic_info" in st.session_state and st.session_state.basic_info else [
+        login_page, user_info_page 
+    ]
+)
 
-visualize()
+st.markdown(sanitize_style, unsafe_allow_html=True)
 
-share_container(theme)
-# ---------------------
-# コメントの投稿
-# ---------------------
-st.markdown(comment_wrapper_style, unsafe_allow_html=True)
-
-st.subheader("コメント")
-comment_container(usecase_comment, usecase_user, topics_idx)
-
-
-st.markdown("---")
-st.write("© 2025 Opinion Galaxy Inc.")
+pg.run()

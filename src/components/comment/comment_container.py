@@ -1,8 +1,10 @@
 from time import sleep
 import streamlit as st
+import logging
 
 from .comment_expander import comment_expander
 
+logger = logging.getLogger(__name__)
 
 @st.fragment
 def comment_container(usecase_comment, usecase_user, topics_idx):
@@ -26,5 +28,5 @@ def comment_container(usecase_comment, usecase_user, topics_idx):
                     st.rerun(scope="fragment")
                 except Exception as e:
                     st.error("コメントが送信できませんでした")
-                    print(e)
+                    logger.error(e)
         comment_expander(usecase_user, usecase_comment, topics_idx)

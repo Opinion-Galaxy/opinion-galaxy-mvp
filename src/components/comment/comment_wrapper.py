@@ -20,10 +20,6 @@ logger = getLogger(__name__)
 avatar_size = 42
 comment_wrapper_style = """
 <style>
-    /* rem設定 */
-    html {
-        font-size: 15px;
-    }
     /* divider余白設定 */
     html body .stMarkdown > div > hr {
         margin: 0;
@@ -103,14 +99,20 @@ comment_wrapper_style = """
     }
     div[class*='st-key-comment-content-'] {
         gap: 8px;
+        width: 100%;
+    }
+    div[class*='st-key-comment-wrapper-'] > div.stHorizontalBlock > div.stColumn div {
+        width: 100%;
     }
 </style>
 """
 
 async def get_random_image_bytes(comment, id):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f"https://picsum.photos/id/{id + 1}/800/800.jpg?hmac=k2yTrnX-Saxlt8-IxfGhOiSb-g3Cuqt-Vgg48L0uENs") as response:
+        async with session.get(f"https://picsum.photos/id/{id + 1}/50/50.jpg?hmac=k2yTrnX-Saxlt8-IxfGhOiSb-g3Cuqt-Vgg48L0uENs") as response:
             image_bytes = await response.read()
+            if image_bytes == b'Image does not exist\n':
+                image_bytes = await get_random_image_bytes(comment, id + 1)
             return image_bytes
 
 @st.cache_data
@@ -132,7 +134,6 @@ async def comment_wrapper(
     is_agree = comment["is_agree"]
     favorite_count = comment["favorite_count"]
     bad_count = comment["bad_count"]
-
     image_id = get_random_image_id(id)
 
     with st.container(key=f"comment-wrapper-{id}", border=True):
@@ -145,11 +146,11 @@ async def comment_wrapper(
                     Image.open(BytesIO(image_bytes)).verify()
                     st.image(image_bytes)
                 except PIL.UnidentifiedImageError:
-                    logger.error("取得したデータは有効な画像ではありません。")
+                    logger.error(f"取得したデータは有効な画像ではありません。 {image_bytes}")
                 except Exception as e:
                     logger.error(f"画像の処理中にエラーが発生しました: {e}")
             else:
-                logger.error("画像データが取得できませんでした。")
+                logger.error(image_bytes, "画像データが取得できませんでした。")
         with wrapper_cols[1]:
             with st.container(key=f"comment-content-{id}"):
                 name_time_cols = st.columns(3 if is_agree is not None and not np.isnan(is_agree) else 2)
@@ -159,7 +160,7 @@ async def comment_wrapper(
                     st.write(
                         format_datetime_diff(
                             datetime.now()
-                            - datetime.strptime(dt, "%Y-%m-%d %H:%M:%S.%f")
+                            - datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
                         )
                     )
                 if is_agree is not None and not np.isnan(is_agree):

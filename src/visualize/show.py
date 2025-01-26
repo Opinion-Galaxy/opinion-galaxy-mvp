@@ -137,7 +137,7 @@ def show_pie_by_sex(data: DataFrame[Dataset]) -> go.Figure:
     
 #     return results
 
-# @st.cache_data
+@st.cache_data
 def show_scatter_geo(data: DataFrame[Dataset], geojoson_path = "data/prefectures.geojson") -> go.Figure:
     geo = gpd.read_file(geojoson_path).rename({"N03_001": "prefecture"}, axis=1)
     # print(geo)

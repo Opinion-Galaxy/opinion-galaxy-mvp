@@ -50,6 +50,7 @@ def login(email, password):
 def logout():
     auth.current_user = None
     del st.session_state.user
+    st.rerun()
 
 def refresh():
     if "user" not in st.session_state:

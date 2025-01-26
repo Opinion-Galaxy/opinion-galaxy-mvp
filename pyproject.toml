@@ -19,7 +19,6 @@ dependencies = [
     "streamlit-javascript (>=0.1.5,<0.2.0)",
     "setuptools (>=75.8.0,<76.0.0)",
     "kaleido (==1.0.0rc0)",
-    "python-dotenv (>=1.0.1,<2.0.0)",
 ]
 
 [tool.poetry]
