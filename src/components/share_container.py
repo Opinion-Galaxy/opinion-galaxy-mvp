@@ -1,4 +1,3 @@
-from typing import Literal
 import streamlit as st
 from streamlit_javascript import st_javascript
 import base64
@@ -13,8 +12,7 @@ def get_base64_of_bin_file(bin_file):
 
 def share_container(selected_topic):
     st.subheader("共有")
-    # theme = st_javascript(get_theme_js)
-    theme = 'light'
+    theme = st_javascript(get_theme_js)
     session = st.runtime.get_instance()._session_mgr.list_active_sessions()[0]
     url = urllib.parse.urlunparse([session.client.request.protocol, session.client.request.host, "", "", "", ""]) + "/" + selected_topic
 
