@@ -227,9 +227,9 @@ def show_radar_chart(data: DataFrame[Dataset]) -> go.Figure:
             angularaxis=dict(showline=True, showticklabels=True),
         ),
         legend=dict(
-            orientation="v",
+            orientation="h",
             yanchor="bottom",
-            y=1.02,
+            y=1.2,
             xanchor="right",
             x=1,
         ),

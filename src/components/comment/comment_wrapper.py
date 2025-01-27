@@ -105,6 +105,9 @@ comment_wrapper_style = """
     div[class*='st-key-comment-wrapper-'] > div.stHorizontalBlock > div.stColumn div {
         width: 100%;
     }
+    div[class*='st-key-comment-content-'] .stColumn div {
+        justify-items: left;
+    }
 </style>
 """
 

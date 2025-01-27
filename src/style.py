@@ -31,11 +31,11 @@ sanitize_style = """
         }
     }
     .stColumn div {
-        justify-items: left;
         margin: 0;
     }
     .stColumn p {
         margin: 0;
     }
+
     </style>
 """
