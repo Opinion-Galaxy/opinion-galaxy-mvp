@@ -44,7 +44,6 @@ def basic_info(usecase_user, dashboard_page):
             user_id = st.session_state.user["localId"]
         with st.spinner("情報を登録中..."):
             try:
-                print("firebase user_id", user_id)
                 user_id = usecase_user.create_user(user_id, name, age, sex, prefecture, city)
             except Exception as e:
                 st.error("ユーザーの作成に失敗しました")
