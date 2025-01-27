@@ -183,5 +183,6 @@ data/*
 !data/database.db
 # !data/japan.geojson
 !data/prefectures.geojson
+!data/image/
 
 .streamlit
