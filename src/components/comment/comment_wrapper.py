@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from time import sleep
 import pandas as pd
 from datetime import datetime
@@ -12,7 +13,7 @@ from io import BytesIO
 from PIL import Image
 import PIL
 
-from .reaction_columns import reaction_columns
+from .reaction_columns import reaction_columns, reset_submitted
 from src.untils import format_datetime_diff
 
 logger = getLogger(__name__)
@@ -107,25 +108,26 @@ comment_wrapper_style = """
 </style>
 """
 
-async def get_random_image_bytes(comment, id):
+async def get_random_image_bytes(id):
     async with aiohttp.ClientSession() as session:
         async with session.get(f"https://picsum.photos/id/{id + 1}/50/50.jpg?hmac=k2yTrnX-Saxlt8-IxfGhOiSb-g3Cuqt-Vgg48L0uENs") as response:
             image_bytes = await response.read()
             if image_bytes == b'Image does not exist\n':
-                image_bytes = await get_random_image_bytes(comment, id + 1)
+                image_bytes = await get_random_image_bytes(id + 1)
             return image_bytes
 
 @st.cache_data
 def get_random_image_id(id):
     return np.random.randint(1, 1000)
 
-async def comment_wrapper(
-    comment,
+@st.fragment
+def comment_wrapper(
+    comment_id,
     usecase_user,
     usecase_comment,
     topics_idx=0,
-    children_comments=pd.DataFrame(),
 ):
+    comment = asdict(usecase_comment.get_comment(comment_id))
     id = comment["id"]
     content = comment["content"]
     user = usecase_user.get_user(comment["user_id"])
@@ -134,12 +136,14 @@ async def comment_wrapper(
     is_agree = comment["is_agree"]
     favorite_count = comment["favorite_count"]
     bad_count = comment["bad_count"]
-    image_id = get_random_image_id(id)
+    # image_id = get_random_image_id(id)
+    images = st.session_state["user_image_dict"][topics_idx]
+    children_comments = usecase_comment.get_children_comments(id)
 
     with st.container(key=f"comment-wrapper-{id}", border=True):
         wrapper_cols = st.columns(2, vertical_alignment="center")
         with wrapper_cols[0]:
-            image_bytes = await get_random_image_bytes(content, image_id)
+            image_bytes = images[comment["user_id"]]
             if image_bytes:
                 try:
                     # PIL で画像を検証
@@ -150,7 +154,8 @@ async def comment_wrapper(
                 except Exception as e:
                     logger.error(f"画像の処理中にエラーが発生しました: {e}")
             else:
-                logger.error(image_bytes, "画像データが取得できませんでした。")
+                # logger.error(image_bytes, "画像データが取得できませんでした。")
+                pass
         with wrapper_cols[1]:
             with st.container(key=f"comment-content-{id}"):
                 name_time_cols = st.columns(3 if is_agree is not None and not np.isnan(is_agree) else 2)
@@ -168,13 +173,45 @@ async def comment_wrapper(
                         st.write("賛成" if is_agree else "反対")
                 st.write(content)
         st.divider()
+
         reaction_columns(id, favorite_count, bad_count, usecase_comment, topics_idx)
 
-        if not children_comments.empty:
-            tasks = [
+        if children_comments is not None:
+            for _, child_comment in children_comments.iterrows():
                 comment_wrapper(
-                    child_comment, usecase_user, usecase_comment, topics_idx
+                    child_comment["id"], usecase_user, usecase_comment, topics_idx
                 )
-                for _, child_comment in children_comments.iterrows()
-            ]
-            await asyncio.gather(*tasks)
+
+    if f"submitted-{id}" in st.session_state and st.session_state[f"submitted-{id}"]:
+        with st.spinner("コメントを送信中..."):
+            try:
+                usecase_comment.post_comment(
+                    st.session_state.basic_info["user_id"],
+                    topics_idx + 1,
+                    getattr(st.session_state, f"text-{id}"),
+                    parent_id=id,
+                    is_agree=getattr(st.session_state, f"agreed-{id}"),
+                )
+                st.session_state[f"successed-comment-{id}"] = True
+                usecase_comment.get_comments_at_topic.clear()
+                usecase_comment.get_children_comments.clear()
+                reset_submitted(id)
+                st.rerun(scope="fragment")
+            except Exception as e:
+                st.error("コメントが送信できませんでした")
+                logger.error(e)
+                reset_submitted(id)
+
+    favorited = st.session_state[f"favorite_{id}"]
+    baded = st.session_state[f"bad_{id}"]
+    if any([favorited, baded]):
+        try:
+            usecase_comment.reaction_at_comment(id, favorited, baded)
+            st.session_state[f"successed-reaction-{id}"] = "❤️" if favorited else "×"
+            st.session_state.comment_fragment_rerun = True
+            usecase_comment.get_comments_at_topic.clear()
+            usecase_comment.get_children_comments.clear()
+            st.rerun(scope="fragment")
+        except Exception as e:
+            st.error("リアクションが送信できませんでした")
+            logger.error(e)

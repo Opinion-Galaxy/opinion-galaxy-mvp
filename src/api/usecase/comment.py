@@ -39,8 +39,11 @@ class Comment:
         comment_df = pd.DataFrame(comment_rows, columns=comment_rows[0].keys())
         return comment_df
 
-    def get_children_comments(self, parent_id):
-        comment_rows = self.repository.find_all(parent_id=parent_id)
+    @st.cache_data
+    def get_children_comments(_self, parent_id):
+        comment_rows = _self.repository.find_all(parent_id=parent_id)
+        if not comment_rows:
+            return None
         comment_df = pd.DataFrame(comment_rows, columns=comment_rows[0].keys())
         return comment_df
 

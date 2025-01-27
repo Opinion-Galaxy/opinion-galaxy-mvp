@@ -36,12 +36,12 @@ def login(usecase_user, user_info_page, dashboard_page):
         )
         st.session_state.first_render = False
         user_info = usecase_user.get_user(st.session_state.user["localId"])
-        print(user_info)
         if user_info is None:
             st.switch_page(user_info_page)
             return
 
         st.session_state.basic_info = {
+            "user_id": user_info.id,
             "name": user_info.name,
             "age": user_info.age,
             "sex": "男性" if user_info.is_male else "女性",

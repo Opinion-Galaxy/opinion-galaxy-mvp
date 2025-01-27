@@ -26,7 +26,7 @@ class Comment:
         query = """
         INSERT INTO comments (
             id, user_id, topic_id, content, parent_id, favorite_count, bad_count, is_agree
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
 
         self.conn.execute(

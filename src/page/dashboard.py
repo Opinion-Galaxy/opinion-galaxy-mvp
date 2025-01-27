@@ -76,9 +76,7 @@ def dashboard(topics, pages, usecase_answer, usecase_user):
                 else:
                     label = " normal"
                 with st.container(border=True, key=f"dashboard-container-{topic_id}-{label}"):
-                    print(pages[i*2])
                     st.page_link(pages[i*2], label=topic)
-                    # st.write(topic)
                     st.metric("賛成率", f"{round((first_d["value"] == "賛成").sum() / len(first_d), 3) * 100:.1f}" "%", f"{agree_rate - prev_first_rate:.1f}%")
         if second_d is not None:
             with cols[1]:
