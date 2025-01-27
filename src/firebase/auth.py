@@ -37,13 +37,14 @@ def login(email, password):
 
         except requests.exceptions.HTTPError as e:
             msg = json.loads(e.args[1])["error"]["message"]
-            if msg == "EMAIL_NOT_FOUND" or msg == "INVALID_PASSWORD":
+            if msg == "EMAIL_NOT_FOUND" or msg == "INVALID_PASSWORD" or msg == "INVALID_LOGIN_CREDENTIALS":
                 st.error("メールアドレスかパスワードに誤りがあります。")
             elif msg == "USER_DISABLED":
                 st.error("このユーザーは無効化されています。管理者にお問い合わせください。")
             elif msg == "TOO_MANY_ATTEMPTS_TRY_LATER":
                 st.error("試行回数が多すぎます。しばらく経ってからお試しください。")
             else:
+                logger.error(msg)
                 logger.error(e)
             return False
 

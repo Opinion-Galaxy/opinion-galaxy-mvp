@@ -36,8 +36,8 @@ class User:
         user_row = user_rows[0]
         return UserEntity(**user_row)
 
-    def get_user(self, user_id: int) -> UserEntity:
-        user_row = self.user_repository.get(user_id)
+    def get_user(self, user_id: uuid.UUID) -> UserEntity:
+        user_row = self.user_repository.get(str(user_id))
         if user_row is None:
             return None
         return UserEntity(
@@ -50,7 +50,7 @@ class User:
             city=user_row["city"]
         )
 
-    def create_user(self, user_id, name: str, age: int, sex: str, prefecture: str, city: str) -> uuid.UUID:
-        user = UserEntity(id=user_id, name=name, age=age, is_male=sex == "男性", prefecture=prefecture, city=city)
+    def create_user(self, user_id:uuid.UUID, name: str, age: int, sex: str, prefecture: str, city: str) -> uuid.UUID:
+        user = UserEntity(id=str(user_id), name=name, age=age, is_male=sex == "男性", prefecture=prefecture, city=city)
         self.user_repository.post(user)
         return user.id

@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 import streamlit as st
 from src.const import (
     prefecture_list,
@@ -9,7 +10,7 @@ from ..style import display_none_style
 logger = logging.getLogger(__name__)
 
 
-def basic_info(usecase_user):
+def basic_info(usecase_user, dashboard_page):
     name = st.text_input("ユーザー名", placeholder="ギャラクシー太郎")
     age = st.number_input("年齢", min_value=0, max_value=100, value=30)
     sex = st.radio(
@@ -32,16 +33,21 @@ def basic_info(usecase_user):
                 "prefecture": prefecture,
                 "city": city
             }
+            sleep(1)
             st.markdown(
                 display_none_style,
                 unsafe_allow_html=True,
             )
-            st.rerun()
+            st.switch_page(dashboard_page)
             return
         if st.session_state.user:
             user_id = st.session_state.user["localId"]
         with st.spinner("情報を登録中..."):
-            user_id = usecase_user.create_user(user_id, name, age, sex, prefecture, city)
+            try:
+                print("firebase user_id", user_id)
+                user_id = usecase_user.create_user(user_id, name, age, sex, prefecture, city)
+            except Exception as e:
+                st.error("ユーザーの作成に失敗しました")
             logger.info(f"ユーザーID: {user_id}")
             st.session_state.basic_info = {
                 "user_id": user_id,
@@ -51,8 +57,9 @@ def basic_info(usecase_user):
                 "prefecture": prefecture,
                 "city": city
             }
+            sleep(1)
             st.markdown(
                 display_none_style,
                 unsafe_allow_html=True,
             )
-            st.rerun()
+            st.switch_page(dashboard_page)

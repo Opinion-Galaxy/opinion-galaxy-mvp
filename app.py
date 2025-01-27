@@ -51,16 +51,6 @@ usecase_user, usecase_comment, usecase_answer = (
 # ユーザー基本情報
 ################################
 
-user_info_page = st.Page(
-    lambda: basic_info(usecase_user),
-    title="ユーザー情報",
-    url_path="user_info",
-    icon=":material/account_circle:"
-)
-login_page = st.Page(lambda: login(usecase_user, user_info_page), title="ログイン", icon=":material/login:")
-
-logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
-
 
 def template_wrapper(selected_topic):
     def template():
@@ -85,6 +75,16 @@ dashboard_page = st.Page(
     default=True
 )
 # if "user" in st.session_state:
+user_info_page = st.Page(
+    lambda: basic_info(usecase_user, dashboard_page),
+    title="ユーザー情報",
+    url_path="user_info",
+    icon=":material/account_circle:"
+)
+login_page = st.Page(lambda: login(usecase_user, user_info_page, dashboard_page), title="ログイン", icon=":material/login:")
+
+logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
+
 #     print(st.session_state.user)
 # if "basic_info" in st.session_state:
 #     print(st.session_state.basic_info)

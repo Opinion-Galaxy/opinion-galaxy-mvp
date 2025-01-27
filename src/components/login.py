@@ -16,12 +16,12 @@ def validation(email, password):
     if len(email) == 0:
         st.error("メールアドレスを入力してください")
         st.rerun()
-    if not re.search("@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
+    if not re.search(r"@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", email):
         st.error("メールアドレスの形式が正しくありません")
         st.rerun()
 
 # @st.dialog("サインイン")
-def login(usecase_user, user_info_page):
+def login(usecase_user, user_info_page, dashboard_page):
     with st.form(key="login-form"):
         email = st.empty()
         email = email.text_input("メールアドレス", placeholder="user@gmail.com")
@@ -47,4 +47,4 @@ def login(usecase_user, user_info_page):
             "prefecture": user_info.prefecture,
             "city": user_info.city
         }
-        st.rerun()
+        st.switch_page(dashboard_page)
