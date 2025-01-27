@@ -43,18 +43,11 @@ def reaction_columns(id, favorite_count, bad_count, usecase_comment, topics_idx)
             on_click=lambda: usecase_comment.get_comments_at_topic.clear(),
         )
 
-    if f"successed-comment-{id}" in st.session_state:
-        print(f"successed-comment-{id}", st.session_state[f"successed-comment-{id}"])
-    if f"successed-reaction-{id}" in st.session_state:
-        print(f"successed-reaction-{id}", st.session_state[f"successed-reaction-{id}"])
-
     if f"successed-comment-{id}" in st.session_state and st.session_state[f"successed-comment-{id}"]:
-        print("successed-comment")
         st.success("コメントを送信しました")
         st.session_state[f"successed-comment-{id}"] = False
 
     if f"successed-reaction-{id}" in st.session_state and st.session_state[f"successed-reaction-{id}"]:
-        print("successed-reaction")
         st.success(st.session_state[f"successed-reaction-{id}"])
         st.session_state[f"successed-reaction-{id}"] = False
 

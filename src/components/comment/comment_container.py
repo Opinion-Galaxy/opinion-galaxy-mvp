@@ -12,7 +12,6 @@ def comment_container(usecase_comment, usecase_user, topics_idx):
         st.session_state["comment-container"] = 0
     else:
         st.session_state["comment-container"] += 1
-    print("comment_container", st.session_state["comment-container"])
     with st.container(border=True, key="comment-container"):
         with st.form("comment-input", border=True):
             comment_val = st.text_area("", placeholder="コメントを入力...", height=68)
