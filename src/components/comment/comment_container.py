@@ -8,10 +8,6 @@ logger = logging.getLogger(__name__)
 
 @st.fragment
 def comment_container(usecase_comment, usecase_user, topics_idx):
-    if "comment-container" not in st.session_state:
-        st.session_state["comment-container"] = 0
-    else:
-        st.session_state["comment-container"] += 1
     with st.container(border=True, key="comment-container"):
         with st.form("comment-input", border=True):
             comment_val = st.text_area("", placeholder="コメントを入力...", height=68)

@@ -139,14 +139,16 @@ def comment_wrapper(
     is_agree = comment["is_agree"]
     favorite_count = comment["favorite_count"]
     bad_count = comment["bad_count"]
-    # image_id = get_random_image_id(id)
     images = st.session_state["user_image_dict"][topics_idx]
     children_comments = usecase_comment.get_children_comments(id)
 
     with st.container(key=f"comment-wrapper-{id}", border=True):
         wrapper_cols = st.columns(2, vertical_alignment="center")
         with wrapper_cols[0]:
-            image_bytes = images[comment["user_id"]]
+            if comment["user_id"] not in images:
+                images[comment["user_id"]] = asyncio.run(get_random_image_bytes(get_random_image_id(comment["user_id"])))
+            else:
+                image_bytes = images[comment["user_id"]]
             if image_bytes:
                 try:
                     # PIL で画像を検証
