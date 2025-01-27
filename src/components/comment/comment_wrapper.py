@@ -46,6 +46,9 @@ comment_wrapper_style = """
         height: 0.75rem;
     }
     /* コメントのスタイル */
+    div[class*='st-key-comment-wrapper-'] > div.stHorizontalBlock:first-child {
+        gap: 0.5rem;
+    }
     div[class*='st-key-comment-wrapper-'] > div.stHorizontalBlock:first-child > div.stColumn {
         min-width: unset;
     }
@@ -60,13 +63,17 @@ comment_wrapper_style = """
         border-radius: 42px;
     }
     /* コメントの名前・時間 */
+    div[class*='st-key-comment-content-'] > div.stHorizontalBlock {
+        gap: 0.3rem;
+    }
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn {
-        min-width: 40px;
-        flex-grow: 0;
+        min-width: 45px;
+        # flex-grow: 0;
         font-size: 0.8rem;
     }
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn  p {
         font-size: 0.75rem;
+        white-space: nowrap;
     }
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn:nth-child(2) {
         color: gray;
@@ -102,8 +109,10 @@ comment_wrapper_style = """
         gap: 8px;
         width: 100%;
     }
+    */ コメントの名前と時間のカラムのラッパー */
     div[class*='st-key-comment-wrapper-'] > div.stHorizontalBlock > div.stColumn div {
         width: 100%;
+        justify-items: center;
     }
     div[class*='st-key-comment-content-'] .stColumn div {
         justify-items: left;
