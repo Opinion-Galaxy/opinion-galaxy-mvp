@@ -146,7 +146,18 @@ def comment_wrapper(
         wrapper_cols = st.columns(2, vertical_alignment="center")
         with wrapper_cols[0]:
             if comment["user_id"] not in images:
-                images[comment["user_id"]] = asyncio.run(get_random_image_bytes(get_random_image_id(comment["user_id"])))
+                try:
+                    loop = asyncio.get_event_loop()
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                try:
+                    task = loop.create_task(get_random_image_bytes(get_random_image_id(comment["user_id"])))
+                    image_bytes = loop.run_until_complete(task)
+                    images[comment["user_id"]] = image_bytes
+                except Exception as e:
+                    logger.error(f"画像の取得に失敗しました: {e}")
+                    image_bytes = None
             else:
                 image_bytes = images[comment["user_id"]]
             if image_bytes:
