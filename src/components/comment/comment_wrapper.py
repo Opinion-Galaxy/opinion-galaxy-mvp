@@ -108,6 +108,8 @@ comment_wrapper_style = """
     div[class*='st-key-comment-content-'] .stColumn div {
         justify-items: left;
     }
+    div[class*='st-key-comment-content-'] .stColumn:nth-child(3) {
+    }
 </style>
 """
 
@@ -166,8 +168,7 @@ def comment_wrapper(
                 except Exception as e:
                     logger.error(f"画像の処理中にエラーが発生しました: {e}")
             else:
-                # logger.error(image_bytes, "画像データが取得できませんでした。")
-                pass
+                logger.error(image_bytes, "画像データが取得できませんでした。")
         with wrapper_cols[1]:
             with st.container(key=f"comment-content-{id}"):
                 name_time_cols = st.columns(3 if is_agree is not None and not np.isnan(is_agree) else 2)
@@ -182,7 +183,7 @@ def comment_wrapper(
                     )
                 if is_agree is not None and not np.isnan(is_agree):
                     with name_time_cols[2]:
-                        st.write("賛成" if is_agree else "反対")
+                        st.markdown(":blue[賛成]" if is_agree else ":red[反対]")
                 st.write(content)
         st.divider()
 
