@@ -48,6 +48,20 @@ def login(email, password):
                 logger.error(e)
             return False
 
+def forget_password(email):
+    try:
+        auth.send_password_reset_email(email)
+        st.success("パスワードリセットのためのメールを送信しました")
+        return True
+    except requests.exceptions.HTTPError as e:
+        msg = json.loads(e.args[1])["error"]["message"]
+        if msg == "EMAIL_NOT_FOUND":
+            st.error("このメールアドレスは登録されていません")
+        else:
+            logger.error(msg)
+            logger.error(e)
+        return False
+
 def logout():
     auth.current_user = None
     del st.session_state.user

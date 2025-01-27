@@ -16,6 +16,7 @@ from src.components import (
     footer,
     basic_info,
     login,
+    forget_password
 )
 from src.page import (
     dashboard,
@@ -81,7 +82,9 @@ user_info_page = st.Page(
     url_path="user_info",
     icon=":material/account_circle:"
 )
-login_page = st.Page(lambda: login(usecase_user, user_info_page, dashboard_page), title="ログイン", icon=":material/login:")
+login_page = st.Page(lambda: None, title="ログイン", icon=":material/login:")
+forget_password_page = st.Page(lambda: forget_password(login_page), title="パスワードを忘れた", icon=":material/password:", url_path="forget_password")
+login_page._page = lambda: login(usecase_user, user_info_page, dashboard_page, forget_password_page)
 
 logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
 
@@ -94,7 +97,7 @@ pg = st.navigation(
         "アカウント": [dashboard_page, user_info_page , logout_page],
         "トピック": pages
     } if "user" in st.session_state and st.session_state.user and "basic_info" in st.session_state and st.session_state.basic_info else [
-        login_page, user_info_page
+        login_page, user_info_page, forget_password_page
     ]
 )
 
