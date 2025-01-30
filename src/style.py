@@ -36,6 +36,17 @@ sanitize_style = """
     .stColumn p {
         margin: 0;
     }
-
+    div:has(+ img.stLogo) {
+        mix-blend-mode: exclusion;
+    }
+    img.stLogo {
+        max-width: unset;
+    }
+    iframe {
+        display: none;
+    }
+    div.stElementContainer:has(iframe), div.stElementContainer:has(div.stMarkdown > div > style) {
+        margin: -0.5rem 0 0 0;
+    }
     </style>
 """

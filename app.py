@@ -2,6 +2,8 @@ import pandas as pd
 import streamlit as st
 import logging
 
+import urllib
+
 # ページ設定
 st.set_page_config(
     page_title="日本の政治論点ダッシュボード",
@@ -88,10 +90,21 @@ login_page._page = lambda: login(usecase_user, user_info_page, dashboard_page, f
 
 logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
 
-#     print(st.session_state.user)
-# if "basic_info" in st.session_state:
-#     print(st.session_state.basic_info)
-# print(st.session_state)
+if "user_id" in st.query_params:
+    user_info = usecase_user.get_user(st.query_params["user_id"])
+    if user_info:
+        st.session_state.user = {
+            "localId": user_info.id,
+        }
+        st.session_state.basic_info = {
+            "user_id": user_info.id,
+            "name": user_info.name,
+            "age": user_info.age,
+            "sex": "男性" if user_info.is_male else "女性",
+            "prefecture": user_info.prefecture,
+            "city": user_info.city,
+        }
+
 pg = st.navigation(
     {
         "アカウント": [dashboard_page, user_info_page , logout_page],
@@ -101,6 +114,18 @@ pg = st.navigation(
     ]
 )
 
+
+session = st.runtime.get_instance()._session_mgr.list_active_sessions()[0]
+url = urllib.parse.urlunparse([session.client.request.protocol, session.client.request.host, "", "", "", ""])
+from streamlit.components.v1 import html
+html('''
+<script>
+    window.parent.document.querySelectorAll("[data-testid=stLogoLink]").forEach(e => {
+        e.setAttribute("target", "_self")
+     });
+</script>
+''')
+st.logo("data/image/logo.png", icon_image="data/image/logo.png", size="large", link=f"{url}" + f"?user_id={st.session_state.basic_info["user_id"]}" if "basic_info" in st.session_state else "")
 st.markdown(sanitize_style, unsafe_allow_html=True)
 
 pg.run()

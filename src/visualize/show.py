@@ -53,8 +53,19 @@ def show_time_series_area(data: DataFrame[Dataset]) -> go.Figure:
         color_discrete_map=color_map,
         labels={"cumsum": "割合", "response_datetime": "日付", "agree": "意見"},
     )
+    fig.update_xaxes(
+        tickformat='%Y-%m-%d',
+    )
     fig.update_layout(
        font=dict(size=20, weight="bold"),
+       yaxis=dict(title=dict(standoff=10)),
+       legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
     return fig
 
@@ -70,9 +81,17 @@ def show_pie_by_sex(data: DataFrame[Dataset]) -> go.Figure:
         facet_col="sex",
         category_orders={"agree": ["賛成", "中立", "反対"]},
         color_discrete_map=color_map,
+        labels={"sex": "性別", "cumsum": "割合", "agree": "意見"},
     )
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(
        font=dict(size=18, weight="bold"),
+       legend=dict(
+           yanchor="bottom",
+            y=1.04,
+            xanchor="right",
+            x=1
+        )
     )
     return fig
 
@@ -160,10 +179,11 @@ def show_scatter_geo(data: DataFrame[Dataset], geojoson_path = "data/prefectures
         map_style="carto-positron",
         color_continuous_scale=px.colors.diverging.RdYlBu_r,
         zoom=3.7,
-        hover_name="prefecture",
+        # hover_name="prefecture",
         width=360,
         height=540,
         range_color=[0.1, 0.9],
+        labels={"cumsum": "賛成割合", "prefecture": "都道府県"},
     )
     fig.update_layout(
        font=dict(size=16, weight="bold"),
@@ -246,16 +266,15 @@ def visualize_data_by_various_method(
 ) -> None:
     with tabs[0]:
         fig = show_time_series_area(cumsum_radio_data)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     with tabs[1]:
         fig = show_pie_by_sex(cumsum_radio_data)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     with tabs[2]:
         fig = show_radar_chart(cumsum_radio_data)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     with tabs[3]:
-        fig = show_scatter_geo(cumsum_radio_data)
-        # Streamlitで表示
-        st.plotly_chart(fig, use_container_width=True)
+        fig = show_scatter_geo(cumsum_radio_data)   
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})

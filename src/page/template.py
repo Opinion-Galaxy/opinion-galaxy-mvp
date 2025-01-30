@@ -63,7 +63,7 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
 
     topics_idx = st.session_state.topics.index(selected_topic)
 
-    st.header(selected_topic)
+    st.header(selected_topic, anchor=selected_topic)
     ################################
     # データの可視化
     ################################
@@ -80,3 +80,26 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
     st.subheader("コメント")
     comment_container(usecase_comment, usecase_user, topics_idx)
 
+    st.markdown(f'''
+                <style>
+                    .back_to_dashboard {{
+                        position: fixed;
+                        bottom: 15px;
+                        right: 15px;
+                    }}
+                    .back_to_dashboard button {{
+                        color: white;
+                        text-align: center;
+                        padding: 4px 8px;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 13px;
+                        margin: 4px 2px;
+                        cursor: pointer;
+                    }}
+                </style>
+                <a target="_self" href="#{selected_topic}" class="back_to_dashboard">
+                    <button>
+                        ダッシュボードに戻る
+                    </button>
+                </a>''', unsafe_allow_html=True)
