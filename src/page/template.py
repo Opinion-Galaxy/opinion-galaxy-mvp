@@ -1,9 +1,5 @@
 import streamlit as st
-from streamlit_javascript import st_javascript
 
-from src.api import usecase
-
-from src.database import get_db_connection, get_user_driver_instance, get_comment_driver_instance, get_answer_driver_instance
 from src.visualize.show import (
     show_pie_by_sex,
     show_radar_chart,
@@ -80,20 +76,13 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
 
     st.subheader("コメント")
     comment_container(usecase_comment, usecase_user, topics_idx)
-    from streamlit.components.v1 import html
-    html('''
-    <script>
-        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
-        console.log("hide share link");
-        console.log(window.top.document.querySelectorAll(`[href*="streamlit.io"]`));
-    </script>
-    ''')
+    
     st.markdown(f'''
                 <link rel="stylesheet" rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home" />
                 <style>
                     .back_to_dashboard {{
                         position: fixed;
-                        bottom: 4vh;
+                        bottom: 3vh;
                         right: 15px;
                     }}
                     .back_to_dashboard button {{

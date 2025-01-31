@@ -11,6 +11,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+from streamlit.components.v1 import html
+html('''
+    <script>
+        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
+    </script>
+''')
 from src.database import get_db_connection, get_topic_instance, get_user_driver_instance, get_comment_driver_instance, get_answer_driver_instance
 from src.firebase.auth import logout
 
