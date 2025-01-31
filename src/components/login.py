@@ -23,7 +23,6 @@ def validation(email, password):
 
 def on_change_forget_email():
     st.session_state.cache_email = st.session_state["forget-email"]
-    print(st.session_state)
 
 def forget_password(login_page):
     with st.container(key="forget-password-form", border=True):
@@ -48,14 +47,12 @@ def on_change_email():
 # @st.dialog("サインイン")
 def login(usecase_user, user_info_page, dashboard_page, forget_password_page):
     with st.container(key="login-form", border=True):
-        print(st.session_state)
         email = st.text_input("メールアドレス", placeholder="user@gmail.com", key="email", on_change=on_change_email, value=st.session_state.cache_email if "cache_email" in st.session_state else "")
         password = st.text_input("パスワード", type="password")
         cols = st.columns(2, vertical_alignment="center")
         with cols[0]:
             submit = st.button("ログイン")
         with cols[1]:
-            # print(st.session_state["login-form"])
             if "cache_email" not in st.session_state or st.session_state.cache_email == "":
                 st.session_state.cache_email = email
             st.page_link(forget_password_page, label="パスワードを忘れた方はこちら")
