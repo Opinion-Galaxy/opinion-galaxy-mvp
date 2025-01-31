@@ -120,9 +120,7 @@ url = urllib.parse.urlunparse([session.client.request.protocol, session.client.r
 from streamlit.components.v1 import html
 html('''
 <script>
-    window.parent.document.querySelectorAll("[data-testid=stLogoLink]").forEach(e => {
-        e.setAttribute("target", "_self")
-     });
+    window.parent.document.querySelectorAll("[data-testid=stLogoLink]").forEach(e => e.setAttribute("target", "_self"));
 </script>
 ''')
 st.logo("data/image/logo.png", icon_image="data/image/logo.png", size="large", link=f"{url}" + f"?user_id={st.session_state.basic_info["user_id"]}" if "basic_info" in st.session_state else "")

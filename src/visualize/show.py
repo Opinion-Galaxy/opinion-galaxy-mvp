@@ -39,7 +39,7 @@ def visualize_basic_pie_chart(data: pd.DataFrame, selected_topic: Topics) -> Non
     fig.update_layout(
        font=dict(size=18, weight="bold"),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 @st.cache_data
