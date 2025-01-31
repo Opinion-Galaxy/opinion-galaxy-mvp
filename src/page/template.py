@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_javascript import st_javascript
 
 from src.api import usecase
 
@@ -79,7 +80,9 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
 
     st.subheader("コメント")
     comment_container(usecase_comment, usecase_user, topics_idx)
-
+    st_javascript('''
+    window.parent.document.querySelectorAll("[href*=streamlit.io]").forEach(e => e.setAttribute("style", "display: none;"));    
+    ''')
     st.markdown(f'''
                 <link rel="stylesheet" rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home" />
                 <style>
