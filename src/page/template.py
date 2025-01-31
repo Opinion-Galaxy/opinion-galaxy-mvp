@@ -108,7 +108,7 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
                         'GRAD' 0,
                         'opsz' 24
                     }}
-                    a[href=*'https://streamlit.io/cloud'] {{
+                    a[href=*"https://streamlit.io/cloud"] {{
                         display: none;
                     }}
                 </style>
