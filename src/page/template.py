@@ -83,9 +83,9 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
     from streamlit.components.v1 import html
     html('''
     <script>
-        window.parent.document.querySelectorAll("[href*='streamlit.io']").forEach(e => e.setAttribute("style", "display: none;"));
+        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
         console.log("hide share link");
-        console.log(window.parent.document.querySelectorAll("[href*='streamlit.io']")));
+        console.log(window.top.document.querySelectorAll(`[href*="streamlit.io"]`));
     </script>
     ''')
     st.markdown(f'''
