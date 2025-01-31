@@ -108,8 +108,9 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
                         'GRAD' 0,
                         'opsz' 24
                     }}
-                    #MainMenu {{visibility: hidden;}}
-                    footer {{visibility: hidden;}}
+                    a[href=*'https://streamlit.io/cloud'] {{
+                        display: none;
+                    }}
                 </style>
                 <a target="_self" href="/{selected_topic}" class="back_to_dashboard" kind="primary">
                     <button>
