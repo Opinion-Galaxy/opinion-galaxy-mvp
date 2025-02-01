@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir poetry
 # Poetry の設定ファイルをコピーして依存関係リストを生成・インストール
 COPY pyproject.toml poetry.lock ./
 RUN poetry export -f requirements.txt -o requirements.txt --without-hashes && \
-    pip install --no-cache-dir -r requirements.txt && \
+    pip istall --no-cache-dir -r requirements.txt && \
     pip uninstall -y poetry && \
     rm -rf /root/.cache/pip
 

@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/python-poetry/poetry-plugin-export
+    # Cannot be executed with local designation (as of 23.11.25)
+    rev: 1.9.0
+    hooks:
+    -   id: poetry-export
+        args: ["-f", "requirements.txt", "--without-hashes", "-o", "requirements.txt"]
+        verbose: true
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: ruff
+      - id: ruff-format
