@@ -1,14 +1,9 @@
 FROM python:3.12-slim-bookworm as build
 WORKDIR /app
 
-# Poetry のインストール（キャッシュ無効化）
-RUN pip install --no-cache-dir poetry
-
 # Poetry の設定ファイルをコピーして依存関係リストを生成・インストール
-COPY pyproject.toml poetry.lock ./
-RUN poetry export -f requirements.txt -o requirements.txt --without-hashes && \
-    pip istall --no-cache-dir -r requirements.txt && \
-    pip uninstall -y poetry && \
+COPY requirements.txt .
+RUN pip istall --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 FROM python:3.12-slim-bookworm as runtime
