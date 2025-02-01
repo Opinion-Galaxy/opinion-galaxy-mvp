@@ -1,9 +1,26 @@
 import pandas as pd
 import streamlit as st
 import logging
-
 import urllib
 import warnings
+from streamlit_javascript import st_javascript
+from streamlit.components.v1 import html
+
+
+from src.database import (
+    get_db_connection,
+    get_topic_instance,
+    get_user_driver_instance,
+    get_comment_driver_instance,
+    get_answer_driver_instance,
+)
+from src.firebase.auth import logout
+
+from src.components import footer, basic_info, login, forget_password, sign_up
+from src.page import dashboard, generate_page
+from src.api import usecase
+
+from src.style import sanitize_style, get_theme_js
 
 # ページ設定
 st.set_page_config(
@@ -12,35 +29,18 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-from streamlit.components.v1 import html
-from src.database import get_db_connection, get_topic_instance, get_user_driver_instance, get_comment_driver_instance, get_answer_driver_instance
-from src.firebase.auth import logout
-
-from src.components import (
-    footer,
-    basic_info,
-    login,
-    forget_password,
-    sign_up
-)
-from src.page import (
-    dashboard,
-    generate_page
-)
-from src.api import usecase
-
-from src.style import sanitize_style, get_theme_js
-
-warnings.simplefilter('ignore', FutureWarning)
+warnings.simplefilter("ignore", FutureWarning)
 pd.set_option("display.max_columns", 100)
 
 logger = logging.getLogger(__name__)
 
-html('''
+html("""
     <script>
         window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
     </script>
-''')
+""")
+
+st.session_state.theme = st_javascript(get_theme_js)
 # Initialize cached resources
 conn = get_db_connection()
 topic_driver = get_topic_instance(conn)
@@ -73,30 +73,52 @@ def template_wrapper(selected_topic):
             st.error("エラーが発生しました")
             st.button("リロード", on_click=st.rerun)
         footer()
+
     return template
-pages =[]
+
+
+pages = []
 for selected_topic in topics:
     pages.append(
-         st.Page(template_wrapper(selected_topic), title=selected_topic, url_path=selected_topic, icon=":material/stacked_line_chart:")
+        st.Page(
+            template_wrapper(selected_topic),
+            title=selected_topic,
+            url_path=selected_topic,
+            icon=":material/stacked_line_chart:",
+        )
     )
 
 dashboard_page = st.Page(
     lambda: dashboard(st.session_state.topics, pages, usecase_answer, usecase_user),
-    title="ダッシュボード", 
+    title="ダッシュボード",
     icon=":material/dashboard:",
-    default=True
+    default=True,
 )
 # if "user" in st.session_state:
 user_info_page = st.Page(
     lambda: basic_info(usecase_user, dashboard_page),
     title="ユーザー情報",
     url_path="user_info",
-    icon=":material/account_circle:"
+    icon=":material/account_circle:",
 )
-login_page = st.Page(lambda: None, title="ログイン", icon=":material/login:", url_path="login")
-forget_password_page = st.Page(lambda: forget_password(login_page), title="パスワードを忘れた", icon=":material/password:", url_path="forget_password")
-login_page._page = lambda: login(usecase_user, user_info_page, dashboard_page, forget_password_page)
-signup_page = st.Page(lambda: sign_up(usecase_user, login_page), title="新規登録", icon=":material/assignment_ind:", url_path="sign_up")
+login_page = st.Page(
+    lambda: None, title="ログイン", icon=":material/login:", url_path="login"
+)
+forget_password_page = st.Page(
+    lambda: forget_password(login_page),
+    title="パスワードを忘れた",
+    icon=":material/password:",
+    url_path="forget_password",
+)
+login_page._page = lambda: login(
+    usecase_user, user_info_page, dashboard_page, forget_password_page
+)
+signup_page = st.Page(
+    lambda: sign_up(usecase_user, login_page),
+    title="新規登録",
+    icon=":material/assignment_ind:",
+    url_path="sign_up",
+)
 
 logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
 
@@ -116,24 +138,38 @@ if "user_id" in st.query_params:
         }
 
 pg = st.navigation(
-    {
-        "アカウント": [dashboard_page, user_info_page , logout_page],
-        "トピック": pages
-    } if "user" in st.session_state and st.session_state.user and "basic_info" in st.session_state and st.session_state.basic_info else [
-        signup_page, login_page, user_info_page, forget_password_page
-    ]
+    {"アカウント": [dashboard_page, user_info_page, logout_page], "トピック": pages}
+    if "user" in st.session_state
+    and st.session_state.user
+    and "basic_info" in st.session_state
+    and st.session_state.basic_info
+    else [signup_page, login_page, user_info_page, forget_password_page]
 )
 
 
 session = st.runtime.get_instance()._session_mgr.list_active_sessions()[0]
-url = urllib.parse.urlunparse([session.client.request.protocol, session.client.request.host, "", "", "", ""])
-from streamlit.components.v1 import html
-html('''
+url = urllib.parse.urlunparse(
+    [session.client.request.protocol, session.client.request.host, "", "", "", ""]
+)
+
+html("""
 <script>
     window.parent.document.querySelectorAll("[data-testid=stLogoLink]").forEach(e => e.setAttribute("target", "_self"));
 </script>
-''')
-st.logo("data/image/logo.png", icon_image="data/image/logo.png", size="large", link=f"{url}" + f"?user_id={st.session_state.basic_info["user_id"]}" if "basic_info" in st.session_state else "")
+""")
+logo_path = (
+    "data/image/logo.png"
+    if st.session_state.theme == "light"
+    else "data/image/opinion_garaxy.png"
+)
+st.logo(
+    logo_path,
+    icon_image=logo_path,
+    size="large",
+    link=f"{url}" + f"?user_id={st.session_state.basic_info['user_id']}"
+    if "basic_info" in st.session_state
+    else "",
+)
 st.markdown(sanitize_style, unsafe_allow_html=True)
 
 pg.run()

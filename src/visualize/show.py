@@ -1,9 +1,5 @@
-import base64
-from concurrent.futures import ThreadPoolExecutor
-from io import BytesIO
 import json
 from typing import Tuple
-import numpy as np
 import plotly.express as px
 from plotly.subplots import make_subplots
 import streamlit as st
@@ -11,7 +7,6 @@ import pandas as pd
 from pandera.typing import DataFrame
 import plotly.graph_objects as go
 import geopandas as gpd
-from PIL import Image
 
 from ..type import Dataset, Topics
 from ..const import color_map
@@ -37,7 +32,7 @@ def visualize_basic_pie_chart(data: pd.DataFrame, selected_topic: Topics) -> Non
         color_discrete_map=color_map,
     )
     fig.update_layout(
-       font=dict(size=18, weight="bold"),
+        font=dict(size=18, weight="bold"),
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
@@ -54,18 +49,12 @@ def show_time_series_area(data: DataFrame[Dataset]) -> go.Figure:
         labels={"cumsum": "割合", "response_datetime": "日付", "agree": "意見"},
     )
     fig.update_xaxes(
-        tickformat='%Y-%m-%d',
+        tickformat="%Y-%m-%d",
     )
     fig.update_layout(
-       font=dict(size=20, weight="bold"),
-       yaxis=dict(title=dict(standoff=10)),
-       legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
+        font=dict(size=20, weight="bold"),
+        yaxis=dict(title=dict(standoff=10)),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     return fig
 
@@ -85,13 +74,8 @@ def show_pie_by_sex(data: DataFrame[Dataset]) -> go.Figure:
     )
     fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
     fig.update_layout(
-       font=dict(size=18, weight="bold"),
-       legend=dict(
-           yanchor="bottom",
-            y=1.04,
-            xanchor="right",
-            x=1
-        )
+        font=dict(size=18, weight="bold"),
+        legend=dict(yanchor="bottom", y=1.04, xanchor="right", x=1),
     )
     return fig
 
@@ -126,16 +110,16 @@ def show_pie_by_sex(data: DataFrame[Dataset]) -> go.Figure:
 #     group, df = group_tuple
 #     # Generate the base64-encoded image
 #     encoded_image = b64image(df.copy())
-    
+
 #     # Calculate centroid buffer and envelope
 #     centroid = df.iloc[0]["geometry"].centroid
 #     buffered = centroid.buffer(1.1)
 #     envelope = buffered.envelope
 #     exterior_coords = list(envelope.exterior.coords)
-    
+
 #     # Prepare coordinates as per Mapbox requirement
 #     coordinates = [list(coord) for coord in exterior_coords[:-1]][::-1]
-    
+
 #     return {
 #         "sourcetype": "image",
 #         "source": encoded_image,
@@ -145,26 +129,29 @@ def show_pie_by_sex(data: DataFrame[Dataset]) -> go.Figure:
 # def create_multithreaded_dicts(data):
 #     # Group the data by 'prefecture'
 #     grouped = data.groupby("prefecture")
-    
+
 #     # Convert groupby object to list of tuples for multiprocessing
 #     group_tuples = list(grouped)
-    
+
 #     # Use ProcessPoolExecutor for CPU-bound tasks
 #     with ThreadPoolExecutor(max_workers=6) as executor:
 #         # Map the process_group function to each group
 #         results = list(executor.map(process_group, group_tuples))
-    
+
 #     return results
 
+
 @st.cache_data
-def show_scatter_geo(data: DataFrame[Dataset], geojoson_path = "data/prefectures.geojson") -> go.Figure:
+def show_scatter_geo(
+    data: DataFrame[Dataset], geojoson_path="data/prefectures.geojson"
+) -> go.Figure:
     geo = gpd.read_file(geojoson_path).rename({"N03_001": "prefecture"}, axis=1)
     # print(geo)
     # geo["address"] = geo["N03_001"] + geo["N03_003"] + geo["N03_004"]
     # geo = geo[["address", "N03_007"]]
     data = preprocess_geo_scatter(data)
     data = gpd.GeoDataFrame(data.merge(geo, on="prefecture", how="left"))
-    abs_max = max(abs(data["cumsum"]))
+    # abs_max = max(abs(data["cumsum"]))
     # Plotlyを使ってマップを描画
     geojson = json.load(open(geojoson_path))
     fig = px.choropleth_map(
@@ -186,9 +173,16 @@ def show_scatter_geo(data: DataFrame[Dataset], geojoson_path = "data/prefectures
         labels={"cumsum": "賛成割合", "prefecture": "都道府県"},
     )
     fig.update_layout(
-       font=dict(size=16, weight="bold"),
-       margin={"l": 0, "r": 0, "t": 0, "b": 0},
-       coloraxis_colorbar=dict(len=0.55, title=dict(text="賛成割合", font_color="black"), x=0, y=0.67, ticks="inside", tickfont=dict(size=15, color="black")),
+        font=dict(size=16, weight="bold"),
+        margin={"l": 0, "r": 0, "t": 0, "b": 0},
+        coloraxis_colorbar=dict(
+            len=0.55,
+            title=dict(text="賛成割合", font_color="black"),
+            x=0,
+            y=0.67,
+            ticks="inside",
+            tickfont=dict(size=15, color="black"),
+        ),
     )
 
     # fig = px.choropleth_mapbox(
@@ -215,10 +209,12 @@ def show_scatter_geo(data: DataFrame[Dataset], geojoson_path = "data/prefectures
 @st.cache_data
 def show_radar_chart(data: DataFrame[Dataset]) -> go.Figure:
     fig = make_subplots(
-        rows=1,
-        cols=2,
-        specs=[[{"type": "polar"}, {"type": "polar"}]],
+        rows=2,
+        cols=1,
+        specs=[[{"type": "polar"}], [{"type": "polar"}]],
         subplot_titles=("男性", "女性"),
+        # horizontal_spacing=0.27,
+        vertical_spacing=0.3,
     )
     men_data, women_data = preprocess_radar_chart_by_sex(data)
 
@@ -233,19 +229,40 @@ def show_radar_chart(data: DataFrame[Dataset]) -> go.Figure:
             labels={"cumsum": "割合", "age": "年代", "agree": "賛成"},
             color_discrete_map=color_map,
             line_dash_map={"男性": "solid", "女性": "dot"},
+            width=800,
         )
         for trace in radar.data:
-            fig.add_trace(trace, row=1, col=i + 1)
+            fig.add_trace(trace, row=i + 1, col=1)
 
     fig.update_layout(
+        # font=dict(size=12),
         polar=dict(
-            radialaxis=dict(visible=True, color="black"),
-            angularaxis=dict(showline=True, showticklabels=True),
+            radialaxis=dict(
+                visible=True, color="white", linewidth=1.5, tickfont=dict(size=11)
+            ),
+            angularaxis=dict(
+                showline=True,
+                showticklabels=True,
+                color="white",
+                linewidth=1.5,
+                tickfont=dict(size=12),
+            ),
+            bgcolor="rgba(0,0,0,0.5)",
         ),
         polar2=dict(
-            radialaxis=dict(visible=True, color="black"),
-            angularaxis=dict(showline=True, showticklabels=True),
+            radialaxis=dict(
+                visible=True, color="white", linewidth=1.5, tickfont=dict(size=11)
+            ),
+            angularaxis=dict(
+                showline=True,
+                showticklabels=True,
+                color="white",
+                linewidth=1.5,
+                tickfont=dict(size=12),
+            ),
+            bgcolor="rgba(0,0,0,0.5)",
         ),
+        margin=dict(l=0, r=0, t=10, b=35),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -254,11 +271,11 @@ def show_radar_chart(data: DataFrame[Dataset]) -> go.Figure:
             x=1,
         ),
     )
-    fig.update_annotations(yshift=30)
+    fig.update_traces(line=dict(width=3.5))
+    fig.update_annotations(yshift=30, font_size=13)
 
     del men_data, women_data
     return fig
-
 
 
 def visualize_data_by_various_method(
@@ -276,5 +293,5 @@ def visualize_data_by_various_method(
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     with tabs[3]:
-        fig = show_scatter_geo(cumsum_radio_data)   
+        fig = show_scatter_geo(cumsum_radio_data)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})

@@ -41,6 +41,14 @@ sanitize_style = """
     }
     img.stLogo {
         max-width: unset;
+        height: 2.5rem;
+        margin: 0;
+    }
+    div[data-testid="stSidebarCollapsedControl"] {
+        top: 1.2rem;
+    }
+    div[data-testid="stSidebarHeader"] {
+        padding-top: 1.2rem;
     }
     iframe {
         display: none;

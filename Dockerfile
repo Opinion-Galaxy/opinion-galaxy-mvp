@@ -19,9 +19,10 @@ COPY --from=build /usr/local/bin /usr/local/bin
 COPY app.py .
 COPY data data
 COPY src src
-COPY run.sh .
+# COPY run.sh .
 
 EXPOSE 8501
 
-USER root
-CMD ["/bin/sh", "-c", "./run.sh"]
+# USER root
+# CMD ["/bin/sh", "-c", "./run.sh"]
+CMD ["streamlit", "run", "app.py"]
