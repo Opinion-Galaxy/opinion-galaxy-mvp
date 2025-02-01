@@ -16,7 +16,9 @@ WORKDIR /app
 COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
 # アプリケーションソースコードもコピー
-COPY --from=build /app /app
+COPY app.py .
+COPY data data
+COPY src src
 
 EXPOSE 8501
 

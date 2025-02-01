@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = [{ name = "edegp", email = "a.yuhi1164@gmail.com" }]
 readme = "README.md"
-requires-python = "3.12.8"
+requires-python = "==3.12.8"
 dependencies = [
     "pandas (==2.2.3)",
     "numpy (==1.26.4)",
