@@ -13,7 +13,7 @@ RUN poetry export -f requirements.txt -o requirements.txt --without-hashes && \
 
 FROM python:3.12-slim-bookworm as runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
