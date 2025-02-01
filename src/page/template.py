@@ -10,7 +10,6 @@ from src.visualize.show import (
 from src.visualize import (
     visualize_basic_pie_chart,
 )
-from src.type import Topics
 from src.data import load_data, create_dataset
 from src.components import (
     comment_container,
@@ -21,6 +20,7 @@ from src.components import (
     share_container,
     visualize_tabs,
 )
+
 
 @st.fragment
 def visualize(data, selected_topic, usecase_answer, topics_idx):
@@ -65,7 +65,6 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
     # データの可視化
     ################################
 
-
     visualize(data, selected_topic, usecase_answer, topics_idx)
 
     share_container(selected_topic)
@@ -76,41 +75,41 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
 
     st.subheader("コメント")
     comment_container(usecase_comment, usecase_user, topics_idx)
-    
-    st.markdown(f'''
-                <link rel="stylesheet" rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home" />
-                <style>
-                    .back_to_dashboard {{
-                        position: fixed;
-                        bottom: 3vh;
-                        right: 15px;
-                    }}
-                    .back_to_dashboard button {{
-                        color: white;
-                        text-align: center;
-                        padding: 4px 8px;
-                        text-decoration: none;
-                        display: inline-block;
-                        font-size: 13px;
-                        margin: 4px 2px;
-                        border-radius: 16px;
-                        cursor: pointer;
-                        background-color: #ff4b4b;
-                        letter-spacing: -1px;
-                    }}
-                    .material-symbols-outlined {{
-                        font-variation-settings:
-                        'FILL' 0,
-                        'wght' 400,
-                        'GRAD' 0,
-                        'opsz' 24
-                    }}
-                    a[href*="https://streamlit.io/cloud"], a[href*="https://share.streamlit.io"] {{
-                        display: none;
-                    }}
-                </style>
-                <a target="_self" href="#" class="back_to_dashboard" kind="primary">
-                    <button>
-                        <span class="material-symbols-outlined">home</span>
-                    </button>
-                </a>''', unsafe_allow_html=True)
+
+    # st.markdown(f'''
+    #             <link rel="stylesheet" rel="preload" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home" />
+    #             <style>
+    #                 .back_to_dashboard {{
+    #                     position: fixed;
+    #                     bottom: 3vh;
+    #                     right: 15px;
+    #                 }}
+    #                 .back_to_dashboard button {{
+    #                     color: white;
+    #                     text-align: center;
+    #                     padding: 4px 8px;
+    #                     text-decoration: none;
+    #                     display: inline-block;
+    #                     font-size: 13px;
+    #                     margin: 4px 2px;
+    #                     border-radius: 16px;
+    #                     cursor: pointer;
+    #                     background-color: #ff4b4b;
+    #                     letter-spacing: -1px;
+    #                 }}
+    #                 .material-symbols-outlined {{
+    #                     font-variation-settings:
+    #                     'FILL' 0,
+    #                     'wght' 400,
+    #                     'GRAD' 0,
+    #                     'opsz' 24
+    #                 }}
+    #                 a[href*="https://streamlit.io/cloud"], a[href*="https://share.streamlit.io"] {{
+    #                     display: none;
+    #                 }}
+    #             </style>
+    #             <a target="_self" href="#" class="back_to_dashboard" kind="primary">
+    #                 <button>
+    #                     <span class="material-symbols-outlined">home</span>
+    #                 </button>
+    #             </a>''', unsafe_allow_html=True)
