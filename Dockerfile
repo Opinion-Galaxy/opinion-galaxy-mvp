@@ -21,8 +21,6 @@ COPY data data
 COPY src src
 COPY run.sh .
 
-RUN 
-
 EXPOSE 8501
 
 CMD ./run.sh
