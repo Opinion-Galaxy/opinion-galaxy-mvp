@@ -109,7 +109,7 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
                         display: none;
                     }}
                 </style>
-                <a target="_self" href="/{selected_topic}" class="back_to_dashboard" kind="primary">
+                <a target="_self" href="#" class="back_to_dashboard" kind="primary">
                     <button>
                         <span class="material-symbols-outlined">home</span>
                     </button>
