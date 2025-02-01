@@ -24,4 +24,4 @@ COPY run.sh .
 EXPOSE 8501
 
 USER root
-CMD ["./run.sh"]
+CMD ["/bin/sh", "-c", "./run.sh"]
