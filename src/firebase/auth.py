@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import pyrebase
 import requests
 import streamlit as st
@@ -13,17 +14,34 @@ auth = firebase.auth()
 def authenticate(email, password):
     try:
         user = auth.create_user_with_email_and_password(email, password)
+        auth.send_email_verification(user["idToken"])
         st.session_state.user = user
         return True
 
     except requests.exceptions.HTTPError as e:
         msg = json.loads(e.args[1])["error"]["message"]
-        if msg != "EMAIL_EXISTS":
-            logger.error(e, msg)
-            st.error("ユーザーの作成に失敗しました")
-        else:
+        if msg == "EMAIL_EXISTS":
             if login(email, password):
                 return True
+        elif "PASSWORD_DOES_NOT_MEET_REQUIREMENTS" in msg:
+            error_msgs = []
+            if "Password must contain at least" in msg:
+                re.search(r"(\d+)", msg)
+                error_msgs.append(f"{re.search(r'at\s+least\s*(\d+)', msg).group(1)}文字以上で")
+            if "Password may contain at most" in msg:
+                error_msgs.append(f"{re.search(r'at\s+most\s*([0-9]+)', msg).group(1)}文字以下で")
+            if "Password must contain an upper case character" in msg:
+                error_msgs.append("大文字のアルファベット")
+            if "Password must contain a lower case character" in msg:
+                error_msgs.append("小文字のアルファベット")
+            if "Password must contain a numeric character" in msg:
+                error_msgs.append("数字")
+            if error_msgs:
+                error_msg = '、'.join(error_msgs)
+                st.error(f"パスワードは{error_msg if error_msg.endswith("以上") or error_msg.endswith("以下") else error_msg +  "を含めて"}入力してください")
+        else:
+            logger.error(e, msg)
+            st.error("ユーザーの作成に失敗しました")
 
         if "user" in st.session_state:
             del st.session_state.user

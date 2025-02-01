@@ -57,10 +57,11 @@ def reaction_columns(id, favorite_count, bad_count, usecase_comment, topics_idx)
             border=True,
         ):
             st.text_area(
-                "",
+                "コメント入力",
                 placeholder="コメントを入力...",
                 key=f"text-{id}",
                 height=68,
+                label_visibility="hidden"
             )
             st.form_submit_button(
                 "賛同する" if agreed else "反論する",

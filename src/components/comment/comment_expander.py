@@ -19,8 +19,8 @@ async def run_tasks(tasks):
 def cancel_existing_tasks():
     if 'tasks' not in st.session_state or not st.session_state.tasks:
         return
-    if 'event_loop' not in st.session_state:
-        return
+    # if 'event_loop' not in st.session_state:
+    #     return
     for task in st.session_state.tasks:
         if not task.done():
             task.cancel()
@@ -29,12 +29,13 @@ def cancel_existing_tasks():
     if loop.is_running():
         # loop が既に動いている場合は、shutdown_asyncgens() 等で後始末
         # run_until_complete() は使えないので、適宜再帰的にキャンセル待ちしてもよい
-        if not any(task.done() for task in st.session_state.tasks):
+        if any(not task.done() for task in st.session_state.tasks):
+            sleep(0.5)
             cancel_existing_tasks()
         else:
             loop.stop()
-            if not loop.is_running():
-                loop.close()
+            # if not loop.is_running():
+            #     loop.close()
     else:
         # イベントループが走っていなければ、キャンセル完了を待つ
         try:
@@ -44,9 +45,9 @@ def cancel_existing_tasks():
             pass
     if loop.is_running():
         loop.stop()
-    else:
-        loop.close()
-    del st.session_state.event_loop
+    # else:
+    #     loop.close()
+    # del st.session_state.event_loop
     st.session_state.tasks = []
 
 
@@ -65,19 +66,22 @@ def comment_expander(
     unique_user_id = comments_at_topic["user_id"].unique()
 
     if 'event_loop' not in st.session_state:
-        st.session_state.event_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(st.session_state.event_loop)
+        try:
+            st.session_state.event_loop = asyncio.get_event_loop()
+        except RuntimeError:
+            st.session_state.event_loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(st.session_state.event_loop)
     if 'tasks' not in st.session_state:
         st.session_state.tasks = []
     loop = st.session_state.event_loop
     st.session_state.tasks = [loop.create_task(get_random_image_bytes(get_random_image_id(user_id)))  for user_id in unique_user_id]
     results = loop.run_until_complete(run_tasks(st.session_state.tasks))
+
     user_image_dict = dict(zip(unique_user_id, results))
     if "user_image_dict" not in st.session_state:
         st.session_state["user_image_dict"] = {}
     st.session_state["user_image_dict"][topics_idx] = user_image_dict
     if all(task.done() for task in st.session_state.tasks):
-        loop.stop()
         loop.close()
         del st.session_state.event_loop
         del st.session_state.tasks

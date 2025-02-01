@@ -10,4 +10,4 @@ from .select_opinion_container import select_opinion_container, select_opinion_s
 from .visualize_tabs import visualize_tabs
 from .share_container import share_container
 from .footer import footer
-from .login import login, forget_password
+from .login import login, forget_password, sign_up

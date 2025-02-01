@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def comment_container(usecase_comment, usecase_user, topics_idx):
     with st.container(border=True, key="comment-container"):
         with st.form("comment-input", border=True):
-            comment_val = st.text_area("", placeholder="コメントを入力...", height=68)
+            comment_val = st.text_area("コメント入力", placeholder="コメントを入力...", height=68, label_visibility="hidden")
             submitted = st.form_submit_button(
                 "コメント",
                 on_click=lambda: usecase_comment.get_comments_at_topic.clear(),

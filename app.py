@@ -3,6 +3,7 @@ import streamlit as st
 import logging
 
 import urllib
+import warnings
 
 # ページ設定
 st.set_page_config(
@@ -12,11 +13,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 from streamlit.components.v1 import html
-html('''
-    <script>
-        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
-    </script>
-''')
 from src.database import get_db_connection, get_topic_instance, get_user_driver_instance, get_comment_driver_instance, get_answer_driver_instance
 from src.firebase.auth import logout
 
@@ -24,7 +20,8 @@ from src.components import (
     footer,
     basic_info,
     login,
-    forget_password
+    forget_password,
+    sign_up
 )
 from src.page import (
     dashboard,
@@ -34,10 +31,16 @@ from src.api import usecase
 
 from src.style import sanitize_style, get_theme_js
 
+warnings.simplefilter('ignore', FutureWarning)
 pd.set_option("display.max_columns", 100)
 
 logger = logging.getLogger(__name__)
 
+html('''
+    <script>
+        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
+    </script>
+''')
 # Initialize cached resources
 conn = get_db_connection()
 topic_driver = get_topic_instance(conn)
@@ -90,9 +93,10 @@ user_info_page = st.Page(
     url_path="user_info",
     icon=":material/account_circle:"
 )
-login_page = st.Page(lambda: None, title="ログイン", icon=":material/login:")
+login_page = st.Page(lambda: None, title="ログイン", icon=":material/login:", url_path="login")
 forget_password_page = st.Page(lambda: forget_password(login_page), title="パスワードを忘れた", icon=":material/password:", url_path="forget_password")
 login_page._page = lambda: login(usecase_user, user_info_page, dashboard_page, forget_password_page)
+signup_page = st.Page(lambda: sign_up(usecase_user, login_page), title="新規登録", icon=":material/assignment_ind:", url_path="sign_up")
 
 logout_page = st.Page(logout, title="ログアウト", icon=":material/logout:")
 
@@ -116,7 +120,7 @@ pg = st.navigation(
         "アカウント": [dashboard_page, user_info_page , logout_page],
         "トピック": pages
     } if "user" in st.session_state and st.session_state.user and "basic_info" in st.session_state and st.session_state.basic_info else [
-        login_page, user_info_page, forget_password_page
+        signup_page, login_page, user_info_page, forget_password_page
     ]
 )
 
