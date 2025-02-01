@@ -25,4 +25,4 @@ RUN
 
 EXPOSE 8501
 
-CMD bash ./run.sh
+CMD ./run.sh
