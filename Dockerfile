@@ -3,7 +3,7 @@ WORKDIR /app
 
 # Poetry の設定ファイルをコピーして依存関係リストを生成・インストール
 COPY requirements.txt .
-RUN pip istall --no-cache-dir -r requirements.txt && \
+RUN pip install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
 FROM python:3.12-slim-bookworm as runtime
