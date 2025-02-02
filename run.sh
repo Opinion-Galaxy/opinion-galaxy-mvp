@@ -8,7 +8,7 @@ error_handler() {
 trap 'error_handler $LINENO' ERR
 
 TOKEN=$(curl -s -H "Metadata-Flavor: Google" \
-  "http://metadata.google.internal//computeMetadata/v1/instance/service-accounts/default/token" | jq -r '.access_token')
+  "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" | jq -r '.access_token')
 
 echo $TOKEN
 
