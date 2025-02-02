@@ -25,7 +25,4 @@ export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
 
 echo "Pods: $PODS"
 
-export PODS_kube=$(kubectl get pods --all-namespaces | grep -v "kube-system" | wc -l)
-echo "Pods: $PODS_kube"
-
 litefs run -- streamlit run app.py --server.port 8080
