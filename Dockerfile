@@ -12,12 +12,24 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+ENV LITEFS_FILE=/data/database.db
+ENV LITEFS_HTTP_ADDR=0.0.0.0:2020
+
 # pip でインストールされたライブラリと実行ファイル（例：streamlit）をコピー
 COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
+
+# for debian/ubuntu-based images
+RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3
+COPY litefs.yml /etc/litefs.yml
+# LiteFS のバイナリをコピー
+COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
 # アプリケーションソースコードもコピー
-COPY --from=build /app /app
+COPY app.py .
+COPY data data
+COPY src src
+COPY run.sh .
 
-EXPOSE 8501
+EXPOSE 8080 20202
 
-CMD ["streamlit", "run", "app.py"]
+CMD ["/bin/sh", "-c", "./run.sh"]
