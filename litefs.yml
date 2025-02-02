@@ -10,7 +10,7 @@ lease:
 
   # Required. The URL for the primary node's LiteFS API.
   # Note: replace `primary` with the appropriate hostname for your primary node!
-  advertise-url: "http://${HOSTNAME}:2020"
+  advertise-url: "http://169.254.8.1:2020"
 
   # Specifies whether the node can become the primary. If using
   # "static" leasing, this should be set to true on the primary
