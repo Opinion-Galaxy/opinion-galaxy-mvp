@@ -25,7 +25,7 @@ echo "ホストのIP（hostname -I）: $HOSTNAME"
 
 export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
   "https://monitoring.googleapis.com/v3/projects/${PROJECT_ID}/timeSeries?filter=metric.type%3D%22run.googleapis.com/container/instance_count%22&interval.startTime=${ONE_MINUTE_AGO}&interval.endTime=${NOW}" \
-  | jq -r '[.timeSeries[]? | .points[0]?.value.int64Value // 0] | add')
+  | jq -r '[.timeSeries[]? | (.points[0]?.value.int64Value // 0)] | add')
 
 echo "Pods: $PODS"
 
