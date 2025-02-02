@@ -16,4 +16,4 @@ lease:
   # "static" leasing, this should be set to true on the primary
   # and false on the replicas.
   # Note: update this to `false` on the replica nodes!
-  candidate: ${PODS == 0}
+  candidate: ${PODS < 2}
