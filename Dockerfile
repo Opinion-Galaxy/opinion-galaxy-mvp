@@ -30,6 +30,6 @@ COPY data data
 COPY src src
 COPY run.sh .
 
-EXPOSE 8080 20202
+EXPOSE 8080 2020
 RUN chmod +x ./run.sh
 CMD ["./run.sh"]
