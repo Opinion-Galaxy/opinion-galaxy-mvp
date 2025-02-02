@@ -16,10 +16,18 @@ PROJECT_ID=$(curl -s -H "Metadata-Flavor: Google" \
 NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 ONE_MINUTE_AGO=$(date -u -d '-1 minute' +"%Y-%m-%dT%H:%M:%SZ")
 
+# ネットワーク情報の表示
+echo "IP アドレス一覧:"
+ip addr show
+
+echo "ホストのIP（hostname -I）:"
+hostname -I
+
 export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
   "https://monitoring.googleapis.com/v3/projects/${PROJECT_ID}/timeSeries?filter=metric.type%3D%22run.googleapis.com/container/instance_count%22&interval.startTime=${ONE_MINUTE_AGO}&interval.endTime=${NOW}" \
-  | jq -r '.timeSeries[] | map(select(.labels.state == "active")) | .points[0].value.int64Value')
+  | jq -r '.timeSeries[] | map(select(.metric.labels.state == "active")) | .points[0].value.int64Value')
 
 echo "Pods: $PODS"
+
 
 litefs run -- streamlit run app.py --server.port 8080
