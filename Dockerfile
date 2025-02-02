@@ -31,5 +31,5 @@ COPY src src
 COPY run.sh .
 
 EXPOSE 8080 20202
-
-CMD ["/bin/sh", "-c", "./run.sh"]
+RUN chmod +x ./run.sh
+CMD ["./run.sh"]

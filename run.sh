@@ -1,4 +1,4 @@
-#!bin/sh
+#!bin/bash
 
 TOKEN=$(curl -s -H "Metadata-Flavor: Google" \
   "http://metadata.google.internal//computeMetadata/v1/instance/service-accounts/default/token" | jq -r '.access_token')
