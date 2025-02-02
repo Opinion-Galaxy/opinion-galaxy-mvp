@@ -20,7 +20,7 @@ COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3
 COPY --from=build /usr/local/bin /usr/local/bin
 
 # for debian/ubuntu-based images
-RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3 jq curl ip hostname&& apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3 jq curl ip hostname && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY litefs.yml /etc/litefs.yml
 # LiteFS のバイナリをコピー
 COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
