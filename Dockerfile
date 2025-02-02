@@ -6,9 +6,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
-RUN wget https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb && \
-    dpkg -i litestream-v0.3.13-linux-amd64.deb && \
-    rm litestream-v0.3.13-linux-amd64.deb
+ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb /tmp/litestream.deb
+
+RUN dpkg -i /tmp/litestream.deb && \
+    rm /tmp/litestream.deb
 
 FROM python:3.12-slim-bookworm as runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -23,7 +24,6 @@ ENV LITEFS_HTTP_ADDR=0.0.0.0:2020
 COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
 
-COPY --from=builder /usr/local/bin/litestream /usr/local/bin/litestream
 COPY litestream.yml /etc/litestream.yml
 
 # for debian/ubuntu-based images
