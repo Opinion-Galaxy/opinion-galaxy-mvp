@@ -1,0 +1,6 @@
+dbs:
+  - path: /app/data/database.db
+    replicas:
+      - type: gcs
+        bucket: "litefs"
+        path: "database.db"
