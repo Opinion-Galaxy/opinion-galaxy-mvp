@@ -27,7 +27,7 @@ export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
   "https://monitoring.googleapis.com/v3/projects/${PROJECT_ID}/timeSeries?filter=metric.type%3D%22run.googleapis.com/container/instance_count%22&interval.startTime=${ONE_MINUTE_AGO}&interval.endTime=${NOW}")
 echo "Pods: $PODS"
 
-export PODS=$($PODS| jq -r '.timeSeries[] | select(.metric.labels.state? == "active") | .points[0]?.value.int64Value // "null"')
+export PODS=$(echo $PODS | jq -r '.timeSeries[] | select(.metric.labels.state? == "active") | .points[0]?.value.int64Value // "null"')
 echo "Pods: $PODS"
 
 litefs run -- streamlit run app.py --server.port 8080
