@@ -25,8 +25,8 @@ export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
 
 echo "Pods: $PODS"
 
-litefs import -name database.db /app/data
 
-litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database.db
+litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database.db && \
+litefs import -name database.db /app/data
 
 litefs run
