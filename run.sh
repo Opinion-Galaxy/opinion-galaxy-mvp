@@ -25,7 +25,6 @@ export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
 
 echo "Pods: $PODS"
 
-
 litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database/database.db && \
 litefs mount
 
