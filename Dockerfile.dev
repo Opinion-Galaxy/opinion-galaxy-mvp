@@ -6,7 +6,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache/pip
 
-ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb /tmp/litestream.deb
+ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-arm64.deb /tmp/litestream.deb
 
 RUN dpkg -i /tmp/litestream.deb && \
     rm /tmp/litestream.deb
@@ -36,6 +36,8 @@ COPY app.py .
 COPY data data
 COPY src src
 COPY run.sh .
+COPY cred.json .
+ENV GOOGLE_APPLICATION_CREDENTIALS=cred.json
 RUN chmod +x ./run.sh
 
 EXPOSE 8080 20202
