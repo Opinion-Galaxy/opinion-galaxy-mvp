@@ -2,14 +2,17 @@ import sqlite3
 import streamlit as st
 
 from src.api import driver
+
+
 # -------------------
 # Cached Database Connection
 # -------------------
 @st.cache_resource(hash_funcs={str: lambda x: x})
-def get_db_connection(db_path="data/database.db"):
+def get_db_connection(db_path="data/database/database.db"):
     conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
+
 
 # -------------------
 # Cached Class Instances

@@ -1,21 +1,12 @@
 fuse:
-  dir: "/app/data"
+  dir: "/app/data/database"
 
 data:
   dir: "/var/lib/litefs"
 
 lease:
-  # Required. Must be either "consul" or "static".
   type: "static"
-
-  # Required. The URL for the primary node's LiteFS API.
-  # Note: replace `primary` with the appropriate hostname for your primary node!
-  advertise-url: "http://169.254.8.1.591561871703.svc.cluster.local:2020"
-
-  # Specifies whether the node can become the primary. If using
-  # "static" leasing, this should be set to true on the primary
-  # and false on the replicas.
-  # Note: update this to `false` on the replica nodes!
+  advertise-url: "http://169.254.8.1.591561871703.svc.cluster.local:20202"
   candidate: ${PODS < 2}
 
-exec: "litestream replicate -exec streamlit run app.py --server.port 8080 -config /etc/litestream.yml"
+exec: "litestream replicate -exec 'streamlit run /app/app.py --server.port 8080 & litefs import -name database.db /app/data/database/database.db'"

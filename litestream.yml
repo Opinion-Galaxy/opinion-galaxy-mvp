@@ -1,6 +1,7 @@
 dbs:
-  - path: /app/data/database.db
+  - path: /app/data/database/database.db
+    meta-path: /var/lib/litefs/database.db-litestream
     replicas:
       - type: gcs
-        bucket: "litefs"
-        path: "database.db"
+        bucket: "opinion-galaxy"
+        path: "litefs/database.db"
