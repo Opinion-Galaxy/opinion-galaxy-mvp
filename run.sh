@@ -26,5 +26,12 @@ export PODS=$(curl -s -H "Authorization: Bearer ${TOKEN}" \
 echo "Pods: $PODS"
 
 litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database/database.db && \
-litefs mount
+litefs mount &
+LITEFS_PID=$!
 
+# 必要な他のプロセスもバックグラウンドで起動する例：
+streamlit run /app/app.py --server.port 8080 &
+STREAMLIT_PID=$!
+
+# すべてのバックグラウンドプロセスの終了を待つ
+wait $LITEFS_PID $STREAMLIT_PID

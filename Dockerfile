@@ -26,7 +26,7 @@ ENV PATH=$PATH:/usr/local/bin
 COPY litestream.yml /etc/litestream.yml
 
 # for debian/ubuntu-based images
-RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3 jq curl iproute2 hostname && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3 jq curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY litefs.yml /etc/litefs.yml
 # LiteFS のバイナリをコピー
 COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
