@@ -1,0 +1,41 @@
+steps:
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - '--dockerfile=Dockerfile'
+      - '--context=dir://.'
+      - >-
+        --destination=${_AR_HOSTNAME}/${PROJECT_ID}/cloud-run-source-deploy/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - '--cache=true'
+      - '--cache-repo=${_AR_HOSTNAME}/${PROJECT_ID}/kaniko-cache/${_SERVICE_NAME}'
+    id: Build
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - run
+      - services
+      - update
+      - '${_SERVICE_NAME}'
+      - '--platform=managed'
+      - >-
+        --image=${_AR_HOSTNAME}/${PROJECT_ID}/cloud-run-source-deploy/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=${COMMIT_SHA},gcb-build-id=${BUILD_ID},gcb-trigger-id=${_TRIGGER_ID}
+      - '--region=${_DEPLOY_REGION}'
+      - '--quiet'
+    id: Deploy
+    entrypoint: gcloud
+images:
+  - >-
+    ${_AR_HOSTNAME}/${PROJECT_ID}/cloud-run-source-deploy/${REPO_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _PLATFORM: managed
+  _SERVICE_NAME: opinion-galaxy-test
+  _TRIGGER_ID: d8efb29d-a453-4b48-9a26-9d27e0d5d5a0
+  _DEPLOY_REGION: asia-northeast1
+  _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - opinion-galaxy-test
