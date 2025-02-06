@@ -6,22 +6,7 @@ import warnings
 from streamlit_javascript import st_javascript
 from streamlit.components.v1 import html
 
-
-from src.database import (
-    get_db_connection,
-    get_topic_instance,
-    get_user_driver_instance,
-    get_comment_driver_instance,
-    get_answer_driver_instance,
-)
-from src.firebase.auth import logout
-
-from src.components import footer, basic_info, login, forget_password, sign_up
-from src.page import dashboard, generate_page
-from src.api import usecase
-
-from src.style import sanitize_style, get_theme_js
-
+# fmt: off
 # ページ設定
 st.set_page_config(
     page_title="日本の政治論点ダッシュボード",
@@ -29,9 +14,25 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+from src.database import ( # noqa: E402
+    get_db_connection,
+    get_topic_instance,
+    get_user_driver_instance,
+    get_comment_driver_instance,
+    get_answer_driver_instance,
+)
+from src.firebase.auth import logout # noqa: E402
+
+from src.components import footer, basic_info, login, forget_password, sign_up # noqa: E402
+from src.page import dashboard, generate_page # noqa: E402
+from src.api import usecase # noqa: E402
+
+from src.style import sanitize_style, get_theme_js # noqa: E402
+
 warnings.simplefilter("ignore", FutureWarning)
 pd.set_option("display.max_columns", 100)
-
+# fmt: on
 logger = logging.getLogger(__name__)
 
 html("""
