@@ -10,10 +10,15 @@ def election_predict():
     st.markdown(
         """
     <style>
-        div[class*="st-key-candidate_card_"] > .stHorizontalBlock .stColumn:first-child {
+        div[class*="st-key-candidate_card_"] > .stHorizontalBlock > .stColumn:first-child {
             flex-basis: 120px;
             width: 120px;
             flex-grow: 0;
+            text-align: center;
+            margin-left: 0.5rem;
+        }
+        div[class*="st-key-candidate_card_"] > .stHorizontalBlock {
+            gap: 2.5rem;
         }
         div[class*="st-key-candidate_card_"] .stHorizontalBlock {
             flex-wrap: nowrap;
@@ -30,6 +35,7 @@ def election_predict():
             width: fit-content;
             flex-grow: 0;
             flex-basis: fit-content;
+            margin: 0;
         }
         div[class*="st-key-candidate_card_"] > .stHorizontalBlock > div:nth-child(2) > div > div > div > div:nth-child(1) > .stColumn:nth-child(1) * {
             width: fit-content !important;
@@ -65,9 +71,23 @@ def election_predict():
     """,
         unsafe_allow_html=True,
     )
-
-    st.header("選挙予測")
-    st.subheader("第100回衆議院選挙 東京31区")
+    st.write(
+        """
+        <h2>選挙予測<span style="font-size: 12px;">※</span></h2>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.subheader("第100回衆議院選挙")
+    st.write(
+        """
+            <p style="
+                text-align: center;
+                font-size: 24px;
+            ">東京31区</p>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.divider()
     dummy_election = st.cache_data(pd.read_csv)("data/dummy_election.csv")
     dummy_election_1 = dummy_election[dummy_election["選挙区"] == "1区"]
     dataset = create_dataset(dummy_election)
@@ -109,13 +129,15 @@ def election_predict():
                         labels={"value": "得票率", "index": "", "variable": ""},
                         hover_data={"value": ":.1f}%"},
                         orientation="h",
-                        height=100,
+                        height=64,
                     )
+                    fig.update_traces(marker_color="#f50909")
                     fig.update_layout(
                         yaxis=dict(
                             tickvals=[0],
                             ticktext=[f"{candidate_row['候補者名']}"],
                             showticklabels=False,
+                            title=None,
                         ),
                         xaxis=dict(
                             range=[0, 100],
@@ -135,11 +157,14 @@ def election_predict():
                             ],
                             title=None,
                         ),
-                        margin=dict(l=0, r=0, t=0, b=0),
+                        margin=dict(l=0, r=0, t=0, b=0, pad=0),
                         showlegend=False,
                     )
                     st.plotly_chart(fig)
                     st.write(
-                        f"""<p style="text-align: center; font-size: 18px">得票率:&emsp;<span style="font-weight: bold; font-size: 32px; {"color: red;" if i == 0 else "color: blue;" if i == 1 else ""}">{candidate_row["得票率"]:.1f}%<span></p>""",
+                        f"""<p style="text-align: center; font-size: 18px">得票率:&emsp;<span style="font-weight: bold; font-size: 28px;">{candidate_row["得票率"]:.1f}%<span></p>""",
                         unsafe_allow_html=True,
                     )
+    st.write(
+        "※ この予測は機械学習モデルによるものであり、実際の選挙結果と異なる場合があります。"
+    )

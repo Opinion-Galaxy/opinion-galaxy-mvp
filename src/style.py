@@ -14,6 +14,10 @@ sanitize_style = """
     html {
         font-size: 15px;
     }
+    /* divider余白設定 */
+    html body .stMarkdown > div > hr {
+        margin: 0;
+    }
     p, ol, ul, dl {
         margin: 0px 0px 1rem;
         padding: 0px;

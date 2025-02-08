@@ -1,15 +1,11 @@
 from dataclasses import asdict
-from time import sleep
-import pandas as pd
 from datetime import datetime
 import numpy as np
 import streamlit as st
-import requests
 from io import BytesIO
 from logging import getLogger
 import aiohttp
 import asyncio
-from io import BytesIO
 from PIL import Image
 import PIL
 
@@ -21,10 +17,7 @@ logger = getLogger(__name__)
 avatar_size = 42
 comment_wrapper_style = """
 <style>
-    /* divider余白設定 */
-    html body .stMarkdown > div > hr {
-        margin: 0;
-    }
+
     /* 画像のフルスクリーンボタンの非表示 */
     div[data-testid='stFullScreenFrame'] .stElementToolbar {
         display: none;
@@ -122,17 +115,22 @@ comment_wrapper_style = """
 </style>
 """
 
+
 async def get_random_image_bytes(id):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f"https://picsum.photos/id/{id + 1}/50/50.jpg?hmac=k2yTrnX-Saxlt8-IxfGhOiSb-g3Cuqt-Vgg48L0uENs") as response:
+        async with session.get(
+            f"https://picsum.photos/id/{id + 1}/50/50.jpg?hmac=k2yTrnX-Saxlt8-IxfGhOiSb-g3Cuqt-Vgg48L0uENs"
+        ) as response:
             image_bytes = await response.read()
-            if image_bytes == b'Image does not exist\n':
+            if image_bytes == b"Image does not exist\n":
                 image_bytes = await get_random_image_bytes(id + 1)
             return image_bytes
+
 
 @st.cache_data
 def get_random_image_id(id):
     return np.random.randint(1, 1000)
+
 
 @st.fragment
 def comment_wrapper(
@@ -163,7 +161,9 @@ def comment_wrapper(
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
                 try:
-                    image_bytes = loop.run_until_complete(get_random_image_bytes(get_random_image_id(comment["user_id"])))
+                    image_bytes = loop.run_until_complete(
+                        get_random_image_bytes(get_random_image_id(comment["user_id"]))
+                    )
                     images[comment["user_id"]] = image_bytes
                 except Exception as e:
                     logger.error(f"画像の取得に失敗しました: {e}")
@@ -178,21 +178,24 @@ def comment_wrapper(
                     Image.open(BytesIO(image_bytes)).verify()
                     st.image(image_bytes)
                 except PIL.UnidentifiedImageError:
-                    logger.error(f"取得したデータは有効な画像ではありません。 {image_bytes}")
+                    logger.error(
+                        f"取得したデータは有効な画像ではありません。 {image_bytes}"
+                    )
                 except Exception as e:
                     logger.error(f"画像の処理中にエラーが発生しました: {e}")
             else:
                 logger.error(image_bytes, "画像データが取得できませんでした。")
         with wrapper_cols[1]:
             with st.container(key=f"comment-content-{id}"):
-                name_time_cols = st.columns(3 if is_agree is not None and not np.isnan(is_agree) else 2)
+                name_time_cols = st.columns(
+                    3 if is_agree is not None and not np.isnan(is_agree) else 2
+                )
                 with name_time_cols[0]:
                     st.write(name)
                 with name_time_cols[1]:
                     st.write(
                         format_datetime_diff(
-                            datetime.now()
-                            - datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
+                            datetime.now() - datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
                         )
                     )
                 if is_agree is not None and not np.isnan(is_agree):
