@@ -6,6 +6,11 @@ class Answer:
     def __init__(self, conn):
         self.conn = conn
 
+    def count_all(self):
+        if not hasattr(self, "len"):
+            self.len = len(self.get_all())
+        return self.len
+
     def find_by_id(self, user_id=None, topic_id=None):
         if user_id is None:
             cursor = self.conn.execute(

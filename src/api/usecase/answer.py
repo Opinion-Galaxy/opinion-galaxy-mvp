@@ -11,12 +11,17 @@ class AnswerEntity:
     topic_id: int
     value: str
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    answered_at: datetime = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    answered_at: datetime = field(
+        default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
 
 
 class Answer:
     def __init__(self, answer_driver):
         self.answer_repo = answer_driver
+
+    def get_answers_length(self):
+        return self.answer_repo.count_all()
 
     def get_all_answers(self):
         all_rows = self.answer_repo.get_all()

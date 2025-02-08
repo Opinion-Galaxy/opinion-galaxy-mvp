@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = [{ name = "edegp", email = "a.yuhi1164@gmail.com" }]
 readme = "README.md"
-requires-python = "==3.12.8"
+requires-python = "==3.12.7"
 dependencies = [
     "pandas (==2.2.3)",
     "numpy (==1.26.4)",
@@ -19,6 +19,8 @@ dependencies = [
     "streamlit-javascript (>=0.1.5,<0.2.0)",
     "setuptools (>=75.8.0,<76.0.0)",
     "kaleido (==1.0.0rc0)",
+    "watchdog (>=6.0.0,<7.0.0)",
+    "lightgbm (>=4.5.0,<5.0.0)",
 ]
 
 [tool.poetry]

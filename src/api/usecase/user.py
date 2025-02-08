@@ -13,12 +13,17 @@ class UserEntity:
     prefecture: str
     city: str
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    created_at: datetime = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    created_at: datetime = field(
+        default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
 
 
 class User:
     def __init__(self, driver_user):
         self.user_repository = driver_user
+
+    def get_users_length(self):
+        return self.user_repository.count_all()
 
     def get_all_users(self):
         user_rows = self.user_repository.get_all()
@@ -47,10 +52,25 @@ class User:
             age=user_row["age"],
             is_male=user_row["is_male"],
             prefecture=user_row["prefecture"],
-            city=user_row["city"]
+            city=user_row["city"],
         )
 
-    def create_user(self, user_id:uuid.UUID, name: str, age: int, sex: str, prefecture: str, city: str) -> uuid.UUID:
-        user = UserEntity(id=str(user_id), name=name, age=age, is_male=sex == "男性", prefecture=prefecture, city=city)
+    def create_user(
+        self,
+        user_id: uuid.UUID,
+        name: str,
+        age: int,
+        sex: str,
+        prefecture: str,
+        city: str,
+    ) -> uuid.UUID:
+        user = UserEntity(
+            id=str(user_id),
+            name=name,
+            age=age,
+            is_male=sex == "男性",
+            prefecture=prefecture,
+            city=city,
+        )
         self.user_repository.post(user)
         return user.id

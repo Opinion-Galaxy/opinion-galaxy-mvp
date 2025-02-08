@@ -2,6 +2,11 @@ class User:
     def __init__(self, conn):
         self.conn = conn
 
+    def count_all(self):
+        if not hasattr(self, "len"):
+            self.len = len(self.get_all())
+        return self.len
+
     def get(self, user_id):
         cursor = self.conn.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         return cursor.fetchone()

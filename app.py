@@ -25,7 +25,11 @@ from src.database import ( # noqa: E402
 from src.firebase.auth import logout # noqa: E402
 
 from src.components import footer, basic_info, login, forget_password, sign_up # noqa: E402
-from src.page import dashboard, generate_page # noqa: E402
+from src.page import ( # noqa: E402
+    dashboard, 
+    election_predict, 
+    generate_page
+) 
 from src.api import usecase # noqa: E402
 
 from src.style import sanitize_style, get_theme_js # noqa: E402
@@ -89,6 +93,12 @@ for selected_topic in topics:
         )
     )
 
+election_predict_page = st.Page(
+    election_predict,
+    title="選挙予測",
+    icon=":material/stacked_line_chart:",
+)
+
 dashboard_page = st.Page(
     lambda: dashboard(st.session_state.topics, pages, usecase_answer, usecase_user),
     title="ダッシュボード",
@@ -139,7 +149,11 @@ if "user_id" in st.query_params:
         }
 
 pg = st.navigation(
-    {"アカウント": [dashboard_page, user_info_page, logout_page], "トピック": pages}
+    {
+        "アカウント": [dashboard_page, user_info_page, logout_page],
+        "選挙予測": [election_predict_page],
+        "トピック": pages,
+    }
     if "user" in st.session_state
     and st.session_state.user
     and "basic_info" in st.session_state

@@ -2,19 +2,18 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from logging import getLogger
-
-logger = getLogger(__name__)
-
 from src.api import usecase
 
 from .const import opinion_map
+
+logger = getLogger(__name__)
 
 
 # サンプルデータの作成
 @st.cache_data(
     hash_funcs={
-        usecase.answer.Answer: lambda x: len(x.get_all_answers()),
-        usecase.user.User: lambda x: len(x.get_all_users()),
+        usecase.answer.Answer: lambda x: x.get_answers_length(),
+        usecase.user.User: lambda x: x.get_users_length(),
     }
 )
 def load_data(
