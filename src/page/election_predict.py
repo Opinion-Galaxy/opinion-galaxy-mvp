@@ -160,7 +160,7 @@ def election_predict():
                         margin=dict(l=0, r=0, t=0, b=0, pad=0),
                         showlegend=False,
                     )
-                    st.plotly_chart(fig)
+                    st.plotly_chart(fig, config={"displayModeBar": False})
                     st.write(
                         f"""<p style="text-align: center; font-size: 18px">得票率:&emsp;<span style="font-weight: bold; font-size: 28px;">{candidate_row["得票率"]:.1f}%<span></p>""",
                         unsafe_allow_html=True,

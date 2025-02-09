@@ -17,7 +17,6 @@ logger = getLogger(__name__)
 avatar_size = 42
 comment_wrapper_style = """
 <style>
-
     /* 画像のフルスクリーンボタンの非表示 */
     div[data-testid='stFullScreenFrame'] .stElementToolbar {
         display: none;
@@ -57,12 +56,16 @@ comment_wrapper_style = """
     }
     /* コメントの名前・時間 */
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock {
-        gap: 0.3rem;
+        gap: 0.75rem;
+        justify-content: start;
     }
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn {
-        min-width: 45px;
-        # flex-grow: 0;
         font-size: 0.8rem;
+    }
+    div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn, div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn * {
+        width: fit-content !important;
+        flex-basis: fit-content;
+        flex-grow: 0;
     }
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn  p {
         font-size: 0.75rem;
@@ -70,7 +73,6 @@ comment_wrapper_style = """
     }
     div[class*='st-key-comment-content-'] > div.stHorizontalBlock > div.stColumn:nth-child(2) {
         color: gray;
-        flex-basis: 80px;
     }
     /* コメントの内容 */
     div[class*='st-key-comment-wrapper-'] > div.stHorizontalBlock:first-child > div.stColumn:nth-child(2) {
