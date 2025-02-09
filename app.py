@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 html("""
     <script>
-        window.top.document.querySelectorAll(`[href*="streamlit.io"]`).forEach(e => e.setAttribute("style", "display: none;"));
+        window.top.document.querySelectorAll(`[href*='streamlit.io']`).forEach(e => e.setAttribute('style', 'display: none;'));
     </script>
 """)
 
@@ -173,7 +173,7 @@ url = urllib.parse.urlunparse(
 
 html("""
 <script>
-    window.parent.document.querySelectorAll("[data-testid=stLogoLink]").forEach(e => e.setAttribute("target", "_self"));
+    window.parent.document.querySelectorAll('[data-testid=stLogoLink]').forEach(e => e.setAttribute('target', '_self'));
 </script>
 """)
 logo_path = (

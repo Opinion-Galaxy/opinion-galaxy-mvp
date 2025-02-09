@@ -1,6 +1,6 @@
 display_none_style = """
                 <style>
-                    div[data-testid="stDialog"] {
+                    div[data-testid='stDialog'] {
                         display: none;
                     }
                 </style>
