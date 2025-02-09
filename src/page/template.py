@@ -23,7 +23,19 @@ from src.components import (
 
 
 @st.fragment
-def visualize(data, selected_topic, usecase_answer, topics_idx):
+def visualize(selected_topic, usecase_user, usecase_answer, topics_idx):
+    if "add_new_data" in st.session_state and st.session_state.add_new_data:
+        load_data.clear()
+        create_dataset.clear()
+        show_time_series_area.clear()
+        show_pie_by_sex.clear()
+        show_radar_chart.clear()
+        show_scatter_geo.clear()
+        visualize_basic_pie_chart.clear()
+        opinion_info.clear()
+        st.session_state.add_new_data = False
+
+    data = load_data(usecase_answer, usecase_user)
     # ---------------------
     # 投票数の表示
     # ---------------------
@@ -45,19 +57,6 @@ def visualize(data, selected_topic, usecase_answer, topics_idx):
 
 
 def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer):
-    if "add_new_data" in st.session_state and st.session_state.add_new_data:
-        load_data.clear()
-        create_dataset.clear()
-        show_time_series_area.clear()
-        show_pie_by_sex.clear()
-        show_radar_chart.clear()
-        show_scatter_geo.clear()
-        visualize_basic_pie_chart.clear()
-        opinion_info.clear()
-        st.session_state.add_new_data = False
-
-    data = load_data(usecase_answer, usecase_user)
-
     topics_idx = st.session_state.topics.index(selected_topic)
 
     st.header(selected_topic, anchor=selected_topic)
@@ -65,7 +64,7 @@ def generate_page(selected_topic, usecase_user, usecase_comment, usecase_answer)
     # データの可視化
     ################################
 
-    visualize(data, selected_topic, usecase_answer, topics_idx)
+    visualize(selected_topic, usecase_user, usecase_answer, topics_idx)
 
     share_container(selected_topic)
     # ---------------------
