@@ -122,10 +122,14 @@ forget_password_page = st.Page(
     url_path="forget_password",
 )
 login_page._page = lambda: login(
-    usecase_user, user_info_page, dashboard_page, forget_password_page
+    usecase_answer,
+    usecase_user,
+    user_info_page,
+    dashboard_page,
+    forget_password_page,
 )
 signup_page = st.Page(
-    lambda: sign_up(usecase_user, login_page),
+    lambda: sign_up(usecase_answer, usecase_user, login_page),
     title="新規登録",
     icon=":material/assignment_ind:",
     url_path="sign_up",

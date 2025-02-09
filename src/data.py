@@ -11,10 +11,11 @@ logger = getLogger(__name__)
 
 # サンプルデータの作成
 @st.cache_data(
+    show_spinner=False,
     hash_funcs={
         usecase.answer.Answer: lambda x: x.get_answers_length(),
         usecase.user.User: lambda x: x.get_users_length(),
-    }
+    },
 )
 def load_data(
     usecase_answer: usecase.answer.Answer, usecase_user: usecase.answer.Answer

@@ -1,5 +1,8 @@
 import re
+
 import streamlit as st
+
+from src.data import load_data
 from .. import firebase
 from ..style import display_none_style
 
@@ -69,7 +72,7 @@ sign_up_style = """
 """
 
 
-def sign_up(usecase_user, login_page):
+def sign_up(usecase_answer, usecase_user, login_page):
     st.markdown(sign_up_style, unsafe_allow_html=True)
     with st.container(key="sign-up-form", border=True):
         email = st.text_input(
@@ -120,6 +123,8 @@ def sign_up(usecase_user, login_page):
                 st.session_state.cache_email = email
             st.page_link(login_page, label="アカウントをお持ちの方はこちら")
 
+    load_data(usecase_answer, usecase_user)
+
 
 login_style = """
 <style>
@@ -132,7 +137,9 @@ login_style = """
 """
 
 
-def login(usecase_user, user_info_page, dashboard_page, forget_password_page):
+def login(
+    usecase_answer, usecase_user, user_info_page, dashboard_page, forget_password_page
+):
     st.markdown(login_style, unsafe_allow_html=True)
     with st.container(key="login-form", border=True):
         email = st.text_input(
@@ -177,3 +184,4 @@ def login(usecase_user, user_info_page, dashboard_page, forget_password_page):
             "city": user_info.city,
         }
         st.switch_page(dashboard_page)
+    load_data(usecase_answer, usecase_user)

@@ -45,6 +45,7 @@ dashboard_style = """
 </style>
 """
 
+
 def dashboard(topics, pages, usecase_answer, usecase_user):
     st.markdown(dashboard_style, unsafe_allow_html=True)
     st.header("ダッシュボード")
@@ -66,33 +67,67 @@ def dashboard(topics, pages, usecase_answer, usecase_user):
             with cols[0]:
                 topic = first_d["topic"].iloc[0]
                 topic_id = topics.index(topic)
-                prev_first_d = first_d[first_d["response_datetime"] < (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")]
-                prev_first_rate = round((prev_first_d["value"] == "賛成").sum() / len(prev_first_d), 3) * 100
-                agree_rate = round((first_d["value"] == "賛成").sum() / len(first_d), 3) * 100
+                prev_first_d = first_d[
+                    first_d["response_datetime"]
+                    < (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+                ]
+                prev_first_rate = (
+                    round(
+                        (prev_first_d["value"] == "賛成").sum() / len(prev_first_d), 3
+                    )
+                    * 100
+                )
+                agree_rate = (
+                    round((first_d["value"] == "賛成").sum() / len(first_d), 3) * 100
+                )
                 if agree_rate < 40:
                     label = "danger"
                 elif agree_rate > 60:
                     label = "clear"
                 else:
                     label = " normal"
-                with st.container(border=True, key=f"dashboard-container-{topic_id}-{label}"):
-                    st.page_link(pages[i*2], label=topic)
-                    st.metric("賛成率", f"{round((first_d["value"] == "賛成").sum() / len(first_d), 3) * 100:.1f}" "%", f"{agree_rate - prev_first_rate:.1f}%")
+                with st.container(
+                    border=True, key=f"dashboard-container-{topic_id}-{label}"
+                ):
+                    st.page_link(pages[i * 2], label=topic)
+                    st.metric(
+                        "賛成率",
+                        f"{round((first_d['value'] == '賛成').sum() / len(first_d), 3) * 100:.1f}"
+                        "%",
+                        f"{agree_rate - prev_first_rate:.1f}%",
+                    )
         if second_d is not None:
             with cols[1]:
                 topic = second_d["topic"].iloc[0]
                 topic_id = topics.index(topic)
-                prev_second_d = second_d[second_d["response_datetime"] < (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")]
-                prev_second_rate = round((prev_second_d["value"] == "賛成").sum() / len(prev_second_d), 3) * 100
-                agree_rate = round((second_d["value"] == "賛成").sum() / len(second_d), 3) * 100
+                prev_second_d = second_d[
+                    second_d["response_datetime"]
+                    < (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+                ]
+                prev_second_rate = (
+                    round(
+                        (prev_second_d["value"] == "賛成").sum() / len(prev_second_d), 3
+                    )
+                    * 100
+                )
+                agree_rate = (
+                    round((second_d["value"] == "賛成").sum() / len(second_d), 3) * 100
+                )
                 if agree_rate < 50:
                     label = "danger"
                 elif agree_rate < 70:
                     label = "normal"
                 else:
                     label = "clear"
-                with st.container(border=True, key=f"dashboard-container-{topic_id}-{label}"):
-                    st.page_link(pages[i*2+1], label=topic)
-                    st.metric("賛成率",  f"{round((second_d["value"] == "賛成").sum() / len(second_d), 3) * 100:.1f}" "%", f"{agree_rate - prev_second_rate:.1f}%")
+                with st.container(
+                    border=True, key=f"dashboard-container-{topic_id}-{label}"
+                ):
+                    st.page_link(pages[i * 2 + 1], label=topic)
+                    st.metric(
+                        "賛成率",
+                        f"{round((second_d['value'] == '賛成').sum() / len(second_d), 3) * 100:.1f}"
+                        "%",
+                        f"{agree_rate - prev_second_rate:.1f}%",
+                    )
     st.divider()
     st.write("※前週比は前週の賛成率とこれまでの賛成率の差を表しています")
