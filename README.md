@@ -8,7 +8,7 @@
 
 https://zenn.dev/edegp/articles/f9be4f4f19814f
 
-##　デモ
+## デモ
 
 https://opinion-galaxy-591561871703.asia-northeast1.run.app
 
