@@ -56,7 +56,9 @@ class Answer:
         SET value = ?, answered_at = ?
         WHERE id = ?
         """
-        self.conn.execute(query, (answer_value, datetime.now(), id))
+        self.conn.execute(
+            query, (answer_value, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), id)
+        )
         self.conn.commit()
 
     def close(self):

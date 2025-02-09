@@ -33,5 +33,5 @@ while true; do
     sleep 2
 done
 
-litefs import -name litefs /app/data/database/database.db
+# litefs import -name litefs /app/data/database/database.db
 litefs import -name litefs /app/data/database.db
