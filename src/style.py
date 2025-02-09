@@ -34,6 +34,9 @@ sanitize_style = """
             min-width: unset;
         }
     }
+    .stMainBlockContainer > div > div > .stVerticalBlock > stElementContainer:nth-child(n+1):not(-n+3) {
+        margin: -1rem;
+    }
     .stColumn div {
         margin: 0;
     }
@@ -58,7 +61,7 @@ sanitize_style = """
         display: none;
     }
     div.stElementContainer:has(iframe), div.stElementContainer:has(div.stMarkdown > div > style) {
-        margin: -0.5rem 0 0 0;
+        margin: -1rem 0 0 0;
     }
     </style>
 """
