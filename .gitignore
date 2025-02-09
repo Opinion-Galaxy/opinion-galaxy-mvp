@@ -184,6 +184,7 @@ data/database/*
 !data/database/database.db
 !data/predict
 !data/dummy_election.csv
+!data/answer_by_tokyo_election_area.csv
 # !data/japan.geojson
 !data/prefectures.geojson
 !data/image/
