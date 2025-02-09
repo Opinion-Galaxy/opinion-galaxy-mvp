@@ -7,7 +7,7 @@ error_handler() {
 }
 trap 'error_handler $LINENO' ERR
 
-rm -f /app/data/database/database.db
+# rm -f /app/data/database/database.db
 
 # TOKEN=$(curl -s -H "Metadata-Flavor: Google" \
 #   "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" | jq -r '.access_token')
@@ -25,8 +25,9 @@ rm -f /app/data/database/database.db
 
 # echo "Pods: $PODS"
 
-litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database/database.db && \
+# litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database/database.db && \
 echo $(sqlite3 /app/data/database/database.db .tables) && \
+echo $(sqlite3 /app/data/database.db .tables) && \
 litefs mount &
 LITEFS_PID=$!
 
