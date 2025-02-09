@@ -2,7 +2,7 @@ import re
 
 import streamlit as st
 
-from src.data import load_data
+# from src.data import load_data
 from .. import firebase
 from ..style import display_none_style
 
@@ -123,7 +123,7 @@ def sign_up(usecase_answer, usecase_user, login_page):
                 st.session_state.cache_email = email
             st.page_link(login_page, label="アカウントをお持ちの方はこちら")
 
-    load_data(usecase_answer, usecase_user)
+    # load_data(usecase_answer, usecase_user)
 
 
 login_style = """
@@ -184,4 +184,4 @@ def login(
             "city": user_info.city,
         }
         st.switch_page(dashboard_page)
-    load_data(usecase_answer, usecase_user)
+    # load_data(usecase_answer, usecase_user)

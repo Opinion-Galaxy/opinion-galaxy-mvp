@@ -182,6 +182,8 @@ data/*
 !data/prefecture_city_lonlat.csv
 data/database/*
 !data/database/database.db
+!data/predict
+!data/dummy_election.csv
 # !data/japan.geojson
 !data/prefectures.geojson
 !data/image/
