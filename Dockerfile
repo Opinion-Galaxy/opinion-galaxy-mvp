@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm AS build
+FROM python:3.12.7-slim-bookworm AS build
 WORKDIR /app
 
 # Poetry の設定ファイルをコピーして依存関係リストを生成・インストール
@@ -11,7 +11,7 @@ ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestre
 RUN dpkg -i /tmp/litestream.deb && \
     rm /tmp/litestream.deb
 
-FROM python:3.12-slim-bookworm AS runtime
+FROM python:3.12.7-slim-bookworm AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
