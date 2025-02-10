@@ -9,4 +9,4 @@ lease:
   advertise-url: "http://169.254.8.1.$PROJECT_ID.svc.cluster.local:20202"
   candidate: ${POD < 2}
 
-exec: "litestream replicate -exec 'litefs import -name database.db /app/data/database/database.db'"
+exec: "litestream replicate -exec 'litefs import -name litefs /app/data/database/database.db'"

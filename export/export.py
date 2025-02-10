@@ -6,8 +6,8 @@ DATA_DIR = "/app/data"
 
 conn = sqlite3.connect(os.path.join(DATA_DIR, "database", "database.db"))
 
-answer_data = pd.read_sql("SELECT * FROM answer", conn)
-user_data = pd.read_sql("SELECT * FROM user", conn)
+answer_data = pd.read_sql("SELECT * FROM answers", conn)
+user_data = pd.read_sql("SELECT * FROM users", conn)
 
 answer_city = answer_data.merge(
     user_data[["id", "prefecture", "city"]], left_on="user_id", right_on="id"
@@ -36,6 +36,6 @@ answer_by_city.merge(
     right_on="市区町村",
     how="left",
 ).drop("市区町村", axis=1).set_index(["city", "topic"]).to_csv(
-    os.path.join("/gcs/data_for_train", "answer_by_tokyo_election_area.csv"),
+    os.path.join("/var/lib/litefs/data_for_train", "answer_by_tokyo_election_area.csv"),
     encoding="utf-8",
 )

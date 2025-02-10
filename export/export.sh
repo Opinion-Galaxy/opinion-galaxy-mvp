@@ -10,12 +10,5 @@ trap 'error_handler $LINENO' ERR
 rm -f /app/data/database/database.db
 
 litestream restore -if-replica-exists -config /etc/litestream.yml /app/data/database/database.db
-
-litefs mount &
-LITEFS_PID=$!
-
-python -m /app/export.py &
-STREAMLIT_PID=$!
-
-# すべてのバックグラウンドプロセスの終了を待つ
-wait $LITEFS_PID $STREAMLIT_PID
+echo $(sqlite3 /app/data/database/database.db .tables)
+python /app/export.py

@@ -3,7 +3,7 @@ WORKDIR /app
 
 RUN apt-get update -y && apt-get install -y ca-certificates libgomp1 fuse3 sqlite3 jq curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir -r pandas  && \
+RUN pip install --no-cache-dir pandas  && \
     rm -rf /root/.cache/pip
 
 ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.deb /tmp/litestream.deb
@@ -11,16 +11,17 @@ ADD https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestre
 RUN dpkg -i /tmp/litestream.deb && \
     rm /tmp/litestream.deb
 
-COPY /usr/bin/litestream /usr/local/bin/litestream
+RUN mv /usr/bin/litestream /usr/local/bin/litestream
 ENV PATH=$PATH:/usr/local/bin
 
 COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
 
 COPY litestream.yml /etc/litestream.yml
 COPY litefs.yml /etc/litefs.yml
-COPY export.py .
-COPY export.sh .
+COPY export/export.py .
+COPY export/export.sh .
 COPY data/topics.csv data/topics.csv
 COPY data/tokyo_election_area.csv data/tokyo_election_area.csv
+RUN chmod +x ./export.sh
 
 CMD ["./export.sh"]
