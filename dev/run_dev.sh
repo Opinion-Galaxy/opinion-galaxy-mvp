@@ -32,7 +32,7 @@ litefs mount &
 LITEFS_PID=$!
 
 # 必要な他のプロセスもバックグラウンドで起動する例：
-streamlit run /app/app.py --server.port 8080 &
+litestream replicate -exec 'streamlit run /app/app.py --server.port 8080' &
 STREAMLIT_PID=$!
 
 # すべてのバックグラウンドプロセスの終了を待つ

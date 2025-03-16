@@ -1,6 +1,5 @@
-import streamlit as st
+import os
 import plotly.express as px
-import pandas as pd
 
 opinion_map = {"1": "賛成", "0": "中立", "-1": "反対"}
 
@@ -12,23 +11,4 @@ color_map = {
 
 figure_tabs = ["意見の推移", "性別の割合", "性別・年代別の割合", "地域別の賛成割合"]
 
-
-@st.cache_data
-def get_prefecture_city():
-    prefecture_city = pd.read_csv(
-        "data/prefecture_city_lonlat.csv",
-        encoding="utf-8",
-    )
-    return prefecture_city
-
-
-# @st.cache_data
-def get_prefecture_and_city_list():
-    prefecture_city = get_prefecture_city()
-    return (
-        prefecture_city["都道府県名"].unique().tolist(),
-        prefecture_city.groupby("都道府県名")["市区町村名"].unique().to_dict(),
-    )
-
-
-prefecture_list, city_dict = get_prefecture_and_city_list()
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")

@@ -1,5 +1,6 @@
 from dataclasses import asdict
 from datetime import datetime
+from time import sleep
 import numpy as np
 import streamlit as st
 from io import BytesIO
@@ -174,10 +175,12 @@ def comment_wrapper(
                     loop.close()
             else:
                 image_bytes = images[comment["user_id"]]
+
             if image_bytes:
                 try:
                     # PIL で画像を検証
                     Image.open(BytesIO(image_bytes)).verify()
+                    sleep(0.1)
                     st.image(image_bytes)
                 except PIL.UnidentifiedImageError:
                     logger.error(

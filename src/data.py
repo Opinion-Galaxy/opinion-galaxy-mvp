@@ -101,3 +101,24 @@ def create_dataset(data: pd.DataFrame, selected_topic: str) -> pd.DataFrame:
 #     )
 #     del prefecture_city, prefecture_city_lonlat
 #     return data
+
+
+@st.cache_data
+def get_prefecture_city():
+    prefecture_city = pd.read_csv(
+        "data/prefecture_city_lonlat.csv",
+        encoding="utf-8",
+    )
+    return prefecture_city
+
+
+@st.cache_data
+def get_prefecture_and_city_list():
+    prefecture_city = get_prefecture_city()
+    return (
+        prefecture_city["都道府県名"].unique().tolist(),
+        prefecture_city.groupby("都道府県名")["市区町村名"].unique().to_dict(),
+    )
+
+
+prefecture_list, city_dict = get_prefecture_and_city_list()

@@ -1,7 +1,9 @@
 fuse:
+  # The path to the mount point.
   dir: "/app/data/database"
 
 data:
+  # The path to the data directory.
   dir: "/var/lib/litefs"
 
 lease:
@@ -9,4 +11,4 @@ lease:
   advertise-url: "http://169.254.8.1.$PROJECT_ID.svc.cluster.local:20202"
   candidate: ${POD < 2}
 
-exec: "litestream replicate -exec 'litefs import -name litefs /app/data/database/database.db'"
+exec: "litefs import -name litefs /app/data/database/database.db"
